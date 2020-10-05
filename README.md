@@ -1,4 +1,4 @@
-# bovine_pangenome_graph
+# Bovine Pangenome Graph
 
 Snakemake pipeline for bovine pangenome graphs construction
 
@@ -11,10 +11,5 @@ Requirements:
 
 Input:
 - Multiple Assemblies in the `workdir/assembly` with naming scheme of {population}.fa
-- File that mapping pangenome graphs name and the order of inclusion. 
+- File that mapping pangenome graphs name and the order of inclusion e.g., `comb UCD,OBV,Angus`.
 First assembly used as the graph scaffold, which is usually the reference genome. 
-
-```
-comb UCD,OBV,Angus
-
-```
