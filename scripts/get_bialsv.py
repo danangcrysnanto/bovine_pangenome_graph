@@ -84,15 +84,15 @@ if __name__ == "__main__":
     nodeinf={}
 
     #s2 1389 1 348029 0
-    with open(f"{assembly}_graph_len.tsv") as infile:
+    with open(f"graph/{assembly}_graph_len.tsv") as infile:
         for line in infile:
             nodeid,nodelen,chromo,pos,rrank=line.strip().split()
             nodeinf[nodeid]=[int(rrank), int(nodelen)]
     
-    with open(f"{assembly}_biallelic_bubble.tsv") as infile:
+    with open(f"analysis/bubble/{assembly}_biallelic_bubble.tsv") as infile:
         for line in infile:
             if sv_det(line):
-                print(sv_det(line))
+                print(*sv_det(line))
 
 
 

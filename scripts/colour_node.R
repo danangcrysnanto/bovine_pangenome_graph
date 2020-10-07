@@ -22,7 +22,7 @@ datlen <- read.table(paste0("graph/",args[1],"_graph_len.tsv"),
 
 ##get id match of the breed
 
-datid <- data.frame(rankid=seq(0,5),
+datid <- data.frame(rankid=seq(0,length(assemb)-1),
                     breed=assemb,stringsAsFactors = FALSE)
 
 colnames(datlen) <- c("nodeid","conlen","chromo","pos","rrank")
@@ -51,4 +51,11 @@ for (i in seq(1,nrow(datmat2))){
 #output file
 datout <- data.frame(nodeid=datcore$nodeid,colnode=colnode)
 
-write.table(datout,file=paste0("graph/",args[1],"_nodecol.tsv"),quote = FALSE,row.names = FALSE,col.names = TRUE)
+##node colour
+write.table(datout,file=paste0("analysis/colour_node/",args[1],"_nodecol.tsv"),quote = FALSE,row.names = FALSE,col.names = TRUE)
+
+#output as matrix
+datmat$nodeid  <- datcore$nodeid
+datmat  <- datmat  %>% select(nodeid, everything())
+write.table(datmat,file=paste0("analysis/colour_node/",args[1],"_nodemat.tsv"),quote = FALSE,row.names = FALSE,col.names = TRUE)
+

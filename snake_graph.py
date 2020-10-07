@@ -1,19 +1,21 @@
 #!/usr/bin/env python
 
-workdir: "test/"
+configfile: srcdir("config/config.yaml")
+workdir: config["workdir"]
 
 import pandas as pd
 
-datstat=pd.read_csv("graph_comp.tsv",sep=" ",header=None,names=["assemb","ascomp"])
-# print(datstat)
-# datstat.shape
+datstat=pd.read_csv(srcdir("config/graph_comp.tsv"),sep=" ",header=None,names=["assemb","ascomp"])
 
 graphcon=list(datstat["assemb"])
 
 
 rule all:
     input:
-        expand("graph/{asb}_nodecol.tsv",asb=graphcon)
+        expand("analysis/colour_node/{asb}_nodecol.tsv", asb=graphcon),
+        expand("analysis/colour_node/{asb}_nodemat.tsv", asb=graphcon),
+        expand("analysis/bubble/{asb}_biallelic_sv.tsv", asb=graphcon),
+        expand("analysis/bubble/{asb}_bialsv_seq.fa", asb=graphcon),
 
 def get_assemb(assemb):
     allcomp=datstat.loc[datstat.assemb==assemb,"ascomp"].iloc[0].split(",")
@@ -23,7 +25,7 @@ rule construct_graph:
     input:
         lambda wildcards: [f"assembly/{x}.fa" for x in get_assemb(wildcards.asb)]
     output:
-        "graph/{asb}_graph.fa",
+        "graph/{asb}_graph.gfa",
         "graph/{asb}_graph_len.tsv"
     threads: 10
     resources:
@@ -31,7 +33,6 @@ rule construct_graph:
         walltime= "00:30"
     shell:
         """
-        #minigraph {input} > {output}
 
         minigraph -xggs -t {threads} {input}  > {output[0]}
 
@@ -52,7 +53,6 @@ rule remap_graph:
         walltime= "01:00"
     shell:
        """
-        #remap {input} > {output}
         minigraph -t {threads} --cov -x asm {input[0]} {input[1]} > {output}
 
        """
@@ -80,7 +80,8 @@ rule colour_node:
         rules.construct_graph.output[1],
         rules.comb_coverage.output
     output:
-        "graph/{asb}_nodecol.tsv"
+        "analysis/colour_node/{asb}_nodecol.tsv",
+        "analysis/colour_node/{asb}_nodemat.tsv"
     threads: 5,
     resources:
         mem_mb= 2000,
@@ -92,6 +93,65 @@ rule colour_node:
             {workflow.basedir}/scripts/colour_node.R {wildcards.asb} {params.assemb}
         """
 
+rule identify_bubble:
+    input:
+        "graph/{asb}_graph.gfa"
+    output:
+        "analysis/bubble/{asb}_bubble.tsv",
+        "analysis/bubble/{asb}_biallelic_bubble.tsv",
+        "analysis/bubble/{asb}_multiallelic_bubble.tsv"
+    threads: 10
+    resources:
+        mem_mb= 2000,
+        walltime= "01:00"
+    shell:
+        """
+
+        gfatools bubble {input} > {output[0]}
+        
+        awk '$5==2 {{ print $1,$2,$4,$5,$12 }}' {output[0]} > {output[1]}
+
+        awk '$5>2 && $5 < 8 {{ print $1,$2,$4,$5,$12 }}' {output[0]} > {output[2]}
+            
+
+        """
+
+
+rule collect_biallelic_sv:
+    input:
+        "graph/{asb}_graph_len.tsv",
+        "analysis/bubble/{asb}_biallelic_bubble.tsv"
+    output:
+        "analysis/bubble/{asb}_biallelic_sv.tsv"
+    threads: 10
+    resources:
+        mem_mb= 2000,
+        walltime= "01:00"
+    shell:
+        """
+
+            {workflow.basedir}/scripts/get_bialsv.py -a {wildcards.asb} > {output}
+
+        """
+
+rule extract_bialseq:
+    input:
+        "graph/{asb}_graph.gfa",
+        rules.collect_biallelic_sv.output
+    output:
+        "analysis/bubble/{asb}_bialsv_seq.fa"
+    threads: 10
+    resources:
+        mem_mb= 1000 ,
+        walltime= "00:30"
+    shell:
+        """
+
+          {workflow.basedir}/scripts/get_bialseq.py -a {wildcards.asb}
+
+        """
 
 
 
+
+ 
