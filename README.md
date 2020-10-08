@@ -35,8 +35,13 @@ graph2 UCD,Angus
 
 *0 and 1 indicate absence and presence respectively
 
+- Structural variations derived from graphs. These are large variations (fragment length > 100 bp) from bubbles in the graph that are
+not part of the reference sequences.  
+The SVs grouped by biallelic and multiallelic. The `{graph}_multisv_stat.tsv`
+contains the stats of the SVs (length, mutation types) and the actual SV sequences located at `{graph}_multisv_seq.tsv`.   
+SVs use `{m|b}{sv_number}_{chr}_{pos}` identifier, where `m|b` indicated from biallelic/multiallelic sites 
+and`{chr}_{pos}` indicated the breakpoint location on the reference genome path. 
 
 
-
-
+ 
 

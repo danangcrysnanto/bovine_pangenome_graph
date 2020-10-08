@@ -16,6 +16,8 @@ rule all:
         expand("analysis/colour_node/{asb}_nodemat.tsv", asb=graphcon),
         expand("analysis/bubble/{asb}_biallelic_sv.tsv", asb=graphcon),
         expand("analysis/bubble/{asb}_bialsv_seq.fa", asb=graphcon),
+        expand("analysis/bubble/{asb}_multiallelic_sv.tsv", asb=graphcon),
+        expand("analysis/bubble/{asb}_multisv_seq.fa", asb=graphcon)
 
 def get_assemb(assemb):
     allcomp=datstat.loc[datstat.assemb==assemb,"ascomp"].iloc[0].split(",")
@@ -151,7 +153,39 @@ rule extract_bialseq:
 
         """
 
+rule collect_multiallelic_sv:
+    input:
+        "graph/{asb}_graph_len.tsv",
+        "analysis/bubble/{asb}_multiallelic_bubble.tsv",
+        "analysis/colour_node/{asb}_nodecol.tsv"
+    output:
+        "analysis/bubble/{asb}_multiallelic_sv.tsv"
+    threads: 10
+    resources:
+        mem_mb= 2000 ,
+        walltime= "01:00"
+    shell:
+        """
+            {workflow.basedir}/scripts/get_multisv.py -a {wildcards.asb} > {output}
+        """
+
+rule extract_multisv:
+    input:
+        "graph/{asb}_graph.gfa",
+        rules.collect_multiallelic_sv.output
+    output:
+        "analysis/bubble/{asb}_multisv_seq.fa"
+    threads: 10
+    resources:
+        mem_mb= 2000 ,
+        walltime= "00:30"
+    shell:
+        """
+            {workflow.basedir}/scripts/get_multiseq.py -a {wildcards.asb}
+        """
 
 
 
- 
+
+
+
