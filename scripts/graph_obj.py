@@ -5,24 +5,25 @@ Class of the directed graph produced by minigraph
 
 Consist of three classess:
 
-    graph : collection of nodes and edges
-    node  : node with attributes
-    edge  : edge with attributes
+    Graph : collection of nodes and edges
+    Node  : node with attributes
+    Edge  : edge with attributes
 
 """
 
 from dataclasses import dataclass
 from collections import defaultdict
 
-class graph():
+
+class Graph():
     """
-    
+
     Store graph properties
 
     Attributes
     nodes : collection of nodes object
     edges: collection of edges object
-    
+
     Methods
     add_node : add new node in the graph
     add_edge: add new edge in the graph
@@ -33,7 +34,8 @@ class graph():
 
 
     """
-    def __init__(self, nodes = None, edges = None):
+
+    def __init__(self, nodes=None, edges=None):
         if nodes:
             self.nodes = nodes
         else:
@@ -46,7 +48,7 @@ class graph():
 
     def add_nodes(self, node):
         """
-        
+
         add a node to the graph
 
         Params:
@@ -80,10 +82,10 @@ class graph():
 
         """
         totlen = 0
-        for node in graph.nodes:
+        for node in self.nodes:
             totlen += node.nodelen
         return totlen
-    
+
     def nonref_len(self):
         """
         Calculate length of the non-ref sequence in the graph
@@ -92,12 +94,12 @@ class graph():
         Output: Length non-ref sequences (bp)
 
         """
-        nonref=0
-        for node in graph.nodes:
+        nonref = 0
+        for node in self.nodes:
             if node.noderank > 0:
                 nonref += node.nodelen
         return nonref
-    
+
     def conv_adjlist(self):
         """
 
@@ -109,12 +111,13 @@ class graph():
         """
 
         adj_list = defaultdict(list)
-        
+
         for edge in self.edges:
             adj_list[edge.parent].append(edge.child)
 
+
 @dataclass
-class node():
+class Node():
     """
 
     Store node properties
@@ -130,29 +133,29 @@ class node():
     noderank : order of inclusion of node (0 reference)
     """
 
-    nodeid : str 
-    nodelen : int  
-    nodeseq : str = ""
-    nodechr : str 
-    nodecoord : int 
-    nodecol : str = ""
-    noderank : int 
+    nodeid: str
+    nodelen: int
+    nodeseq: str = ""
+    nodechr: str
+    nodecoord: int
+    nodecol: str = ""
+    noderank: int
 
 
 @dataclass
-class edge():
+class Edge():
     """
-    
+
     Store edge properties
     Edges always directed
-    
+
     parent ---> child
 
     Strand denotes orientation (+/-)
 
     """
 
-    parent : str 
-    child : str
+    parent: str
+    child: str
     strand_parent: str
     strand_child: str

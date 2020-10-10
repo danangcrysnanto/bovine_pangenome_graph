@@ -13,7 +13,7 @@ output:
 
 from collections import defaultdict
 import argparse
-from get_bialseq import revstrand, revcomp, parse_graph
+from graph_utils import revstrand, revcomp, parse_graph
 
 
 def parse_args():
@@ -62,9 +62,10 @@ def chain_node(graph, paths):
         # report successful with the strand
     return chainstrand, strandprev, strandnext
 
+
 def get_sv_seq(grseq, paths, chainstrand, ):
     """
-    
+
     Given paths output the sequences 
     by concatenating with correct orientation
 
@@ -83,19 +84,25 @@ def get_sv_seq(grseq, paths, chainstrand, ):
         # add the 100 bp flanking ref for the start of the path
         if not ind:
             try:
-                totseq = grseq[path][-100:] if chainstrand[0] == "+" else revcomp(grseq[path])[-100:]
+                totseq = grseq[path][-100:] if chainstrand[0] == "+" else revcomp(
+                    grseq[path])[-100:]
             except:
-                totseq = grseq[path] if chainstrand[0] == "+" else revcomp(grseq[path])
+                totseq = grseq[path] if chainstrand[0] == "+" else revcomp(
+                    grseq[path])
         else:
             # add 100 bp ref at the end of the path
             if ind == (len(paths)-1):
                 try:
-                    totseq += grseq[path][:100] if chainstrand[2] == "+" else revcomp(grseq[path])[:100]
+                    totseq += grseq[path][:100] if chainstrand[2] == "+" else revcomp(grseq[path])[
+                        :100]
                 except:
-                    totseq += grseq[path] if chainstrand[2] == "+" else revcomp(grseq[path])
+                    totseq += grseq[path] if chainstrand[2] == "+" else revcomp(
+                        grseq[path])
             else:
-                totseq += grseq[path] if chainstrand[2] == "+" else revcomp(grseq[path])
+                totseq += grseq[path] if chainstrand[2] == "+" else revcomp(
+                    grseq[path])
     return totseq
+
 
 if __name__ == "__main__":
     args = parse_args()
@@ -103,7 +110,7 @@ if __name__ == "__main__":
     grseq, graph = parse_graph(f"graph/{assembly}_graph.gfa")
 
     regfile = open(f"analysis/bubble/{assembly}_multisv_stat.tsv", "a")
-    errfile = open(f"analysis/bubble/{assembly}_multisv_conflict.tsv","a")
+    errfile = open(f"analysis/bubble/{assembly}_multisv_conflict.tsv", "a")
     multiseq = open(f"analysis/bubble/{assembly}_multisv_seq.fa", "a")
 
     with open(f"analysis/bubble/{assembly}_multiallelic_sv.tsv") as infile:
@@ -112,11 +119,11 @@ if __name__ == "__main__":
             # 1_1579557       392     482     AltIns  s54,s55,s140149,s57
             pos, reflen, nonreflen, svtype, paths = line_comp
             paths = paths.split(",")
-            sv_count=0
+            sv_count = 0
             if svtype != "Deletions" and int(nonreflen) > 100:
-                #chain node with correct orientation
-                chainstrand, strandprev, strandnext =  chain_node(graph, paths)
-                #output sequences if there's no conflict
+                # chain node with correct orientation
+                chainstrand, strandprev, strandnext = chain_node(graph, paths)
+                # output sequences if there's no conflict
                 if len(chainstrand) == len(paths):
                     sv_count += 1
                     totseq = get_sv_seq(grseq, paths, chainstrand)
@@ -126,4 +133,5 @@ if __name__ == "__main__":
                     multiseq.write(f"{totseq}\n")
                 # otherwise output conflict in errfile
                 else:
-                    print(*line_comp, chainstrand, strandprev, strandnext, file = errfile)
+                    print(*line_comp, chainstrand, strandprev,
+                          strandnext, file=errfile)
