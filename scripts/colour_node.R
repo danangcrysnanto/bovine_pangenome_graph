@@ -39,16 +39,6 @@ for (i in seq(1,nrow(datlen))){
 datmat2 <- datmat 
 datlab <- datmat 
 
-#colnode <- rep("0",nrow(datlab))
-#for (i in seq(1,nrow(datmat2))){
-  #labcol <- colnames(datmat2[i,which(datmat2[i,]==1),drop=FALSE]) %>% 
-    #sapply(function(x) substr(x,1,1)) %>% 
-    #as.vector() %>% 
-    #paste0(collapse = "")
-  #colnode[i] <- labcol
-#}
-
-
 colnode <- rep("0",nrow(datlab))
 for (i in seq(1,nrow(datmat2))){
   labcol <- colnames(datmat2[i,which(datmat2[i,]==1),drop=FALSE]) %>% 

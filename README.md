@@ -41,6 +41,9 @@ not part of the reference sequences.
 The SVs grouped by biallelic and multiallelic. The `{graph}_multisv_stat.tsv`
 contains the stats of the SVs (length, mutation types) and the actual SV sequences located at `{graph}_multisv_seq.tsv`.   
 SVs use `{m|b}{sv_number}_{chr}_{pos}` identifier, where `m|b` indicated from biallelic/multiallelic sites 
+
+- Reports in `reports/{graph}` folder. This contains summary of computational resources and the statistics of the graphs
+generated. Will output a single pdf from each constructed graph. See the example [Here](reports/graph5_reports.pdf)
 and`{chr}_{pos}` indicated the breakpoint location on the reference genome path. 
 
 

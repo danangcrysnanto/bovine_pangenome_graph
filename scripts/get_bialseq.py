@@ -58,7 +58,7 @@ if __name__ == "__main__":
     args = parse_args()
     assembly = args.assembly
     # container to store node and edge sequences
-    grseq, graph = parse_graph("graph/{assembly}_graph.gfa")
+    grseq, graph = parse_graph(f"graph/{assembly}_graph.gfa")
     # with open(f"graph/{assembly}_graph.gfa") as infile:
     # for line in infile:
     # # parse the node sequences
