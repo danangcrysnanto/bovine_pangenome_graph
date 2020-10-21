@@ -18,6 +18,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("-a", "--assembly", help="Graph to report")
+    parser.add_argument("-c", "--component", help="Graph to report", nargs="+")
     return parser.parse_args()
 
 
@@ -49,12 +50,13 @@ def resources_stat(assembly):
 def main():
     args = parse_args()
     assembly = args.assembly
+    component = args.component
     intro_string = (f"# **Graph generation report for {assembly}**\n\n\n"
                     f"*Generated on {time.strftime('%a %H:%M %d %B %Y' )}*\n\n"
                     "[TOC]\n"
                     "### *Computational resources*\n")
     resources_string = resources_stat(assembly)
-    graph_string = graph_stat.graph_stat_report(assembly)
+    graph_string = graph_stat.graph_stat_report(assembly, component)
     all_string = intro_string + resources_string + "\n\n\n### *Graph statistics*\n\n\n" + graph_string
     html = markdown.markdown(all_string, extensions=["tables", "toc"])
     with open(f"reports/{assembly}_report.html", "w", encoding="utf-8") as outfile:

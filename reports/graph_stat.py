@@ -44,7 +44,7 @@ def edge_classifier(graph):
     return edge_counter
 
 
-def graph_stat_report(assembly="graph5"):
+def graph_stat_report(assembly, assemb_comp):
     combgraph = Graph()
     graphfile = f"graph/{assembly}_graph.gfa"
     with open(graphfile) as infile:
@@ -71,14 +71,10 @@ def graph_stat_report(assembly="graph5"):
     # Add non-reference graph len
     report_string += f"| Non-reference nodes| {nonref_count} | {nonref_len}| \n "
     # Add from non-ref from each assembly
-    for key, values in all_nodes.items():
+    for ind, [key, values] in enumerate(all_nodes.items()):
         if key != 0:
-            report_string += f"|Added {key}|{values[0]} | {values[1]}| \n"
+            report_string += f"|Added from {assemb_comp[ind]}|{values[0]} | {values[1]}| \n"
     # Add edge types
     for key, value in edge_classifier(combgraph).items():
         report_string += f"|Edge {key}|{value}|0| \n"
     return report_string
-
-
-if __name__ == "__main__":
-    graph_stat_report()

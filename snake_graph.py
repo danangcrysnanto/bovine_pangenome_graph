@@ -8,6 +8,7 @@ workdir: config["workdir"]
 datstat = pd.read_csv(srcdir("config/graph_comp.tsv"), sep=" ", header=None, names=["assemb", "ascomp"])
 
 graphcon = list(datstat["assemb"])
+svlist = ["biallelic", "multiallelic"]
 
 
 rule all:
@@ -18,7 +19,8 @@ rule all:
         expand("analysis/bubble/{asb}_bialsv_seq.fa", asb=graphcon),
         expand("analysis/bubble/{asb}_multiallelic_sv.tsv", asb=graphcon),
         expand("analysis/bubble/{asb}_multisv_seq.fa", asb=graphcon),
-        expand("reports/{asb}_report.pdf", asb=graphcon)
+        expand("reports/{asb}_report.pdf", asb=graphcon),
+        expand("analysis/bubble/{asb}_{svtype}_sv_viz.pdf", asb=graphcon, svtype=svlist)
 
 
 def get_assemb(assemb):
@@ -31,7 +33,8 @@ rule construct_graph:
         lambda wildcards: [f"assembly/{x}.fa" for x in get_assemb(wildcards.asb)]
     output:
         "graph/{asb}_graph.gfa",
-        "graph/{asb}_graph_len.tsv"
+        "graph/{asb}_graph_len.tsv",
+        "graph/{asb}_graph_link.tsv"
     threads: 10
     resources:
         mem_mb = 10000,
@@ -43,6 +46,8 @@ rule construct_graph:
 
         awk '$1~/S/ {{ split($5,chr,":"); split($6,pos,":"); split($7,arr,":");
             print $2,length($3),chr[3],pos[3],arr[3] }}' {output[0]} > {output[1]}
+
+        awk '$1 == "L"' {output[0]} > {output[2]}
 
         """
 
@@ -187,16 +192,38 @@ rule extract_multisv:
             {workflow.basedir}/scripts/get_multiseq.py -a {wildcards.asb}
         """
 
+rule visualize_sv:
+    input:
+        rules.collect_biallelic_sv.output,
+        rules.collect_multiallelic_sv.output,
+        rules.construct_graph.output
+    output: "analysis/bubble/{asb}_{svtype}_sv_viz.pdf"
+    threads: 10
+    params:
+        assemb = lambda wildcards: get_assemb(wildcards.asb)
+    resources:
+        mem_mb = 1000,
+        walltime = "01:00"
+    shell:
+        """
+
+            {workflow.basedir}/viz/sv_viz.py -g {wildcards.asb} -c {params.assemb} -m {wildcards.svtype}
+
+        """
+
+
 rule generate_report:
     input:
         "graph/{asb}_graph.gfa"
     output:
         "reports/{asb}_report.pdf"
     threads: 10
+    params:
+        assemb = lambda wildcards: get_assemb(wildcards.asb)
     resources:
         mem_mb = 1000,
         walltime = "01:00"
     shell:
         """
-            {workflow.basedir}/reports/generate_report.py -a {wildcards.asb}
+            {workflow.basedir}/reports/generate_report.py -a {wildcards.asb} -c {params.assemb}
         """
