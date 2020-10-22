@@ -28,12 +28,12 @@ graph2 UCD,Angus
 - Integrated pangenome graphs in `graph` folder with prefix set in the config e.g., `graph1.gfa`    
 - Matrix that map node to the assembly it derives (i.e., node colour), e.g.,    
 
-|Node|UCD|OBV|Angus|   
-|-|-|-|-|
-|s1|1|0|0|
-|s2|0|1|1|
+    |Node|UCD|OBV|Angus|   
+    |-|-|-|-|
+    |s1|1|0|0|
+    |s2|0|1|1|
 
-*0 and 1 indicate absence and presence respectively
+    *0 and 1 indicate absence and presence respectively
 
 - Structural variations derived from graphs.      
 These are large variations (fragment length > 100 bp) from bubbles in the graph that are
@@ -42,6 +42,10 @@ The SVs grouped by biallelic and multiallelic. The `{graph}_multisv_stat.tsv`
 contains the stats of the SVs (length, mutation types) and the actual SV sequences located at `{graph}_multisv_seq.tsv`.   
 SVs use `{m|b}{sv_number}_{chr}_{pos}` identifier, where `m|b` indicated from biallelic/multiallelic sites 
 and`{chr}_{pos}` indicated the breakpoint location on the reference genome path. 
+
+- Visualization of the bubbles (SVs) in the graphs. Selected bubbles visualized using `Graphviz` and stored in a combined `{graph}_{b|m}_viz.pdf` file.  
+Script [viz/app.py](viz.app.py) (`options -g {graphtype}`) can be run which will set up a local webserver to scrutinize the SVs in a more detail in an interactive way. 
+
 
 - Reports in `reports/{graph}` folder. This contains summary of computational resources and the statistics of the graphs
 generated. Will output a single pdf from each constructed graph. See the example [Here](reports/graph5_report.pdf)

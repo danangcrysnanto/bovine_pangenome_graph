@@ -18,10 +18,10 @@ def parse_args():
     return parser.parse_args()
 
 
-def generate_edges(ingraph):
+def generate_edges(basegraph, ingraph):
     # databose on graph edges
     graph = defaultdict(list)
-    with open(f"graph/{ingraph}_graph_link.gfa") as infile:
+    with open(f"{basegraph}/{ingraph}_graph_link.gfa") as infile:
         for line in infile:
             if line.startswith("L"):
                 link, parent, strand1, child, strand2, *_ = line.strip().split()
@@ -32,15 +32,15 @@ def generate_edges(ingraph):
     return graph
 
 
-def graph_info(graphlen):
+def graph_info(basegraph, graphlen):
     # database on nodes and its length
     nodeinf = {}
 
     # s2 1389 1 348029 0
-    with open(f"graph/{graphlen}_graph_len.tsv") as infile:
+    with open(f"{basegraph}/{graphlen}_graph_len.tsv") as infile:
         for line in infile:
             nodeid, nodelen, chromo, pos, rrank = line.strip().split()
-            nodeinf[nodeid] = [int(rrank), int(nodelen)]
+            nodeinf[nodeid] = [int(rrank), int(nodelen), chromo, int(pos)]
     return nodeinf
 
 
@@ -59,13 +59,13 @@ def generate_colour(graphcomp):
     return colsel
 
 
-def DFS(graph, start, end, path=None, paths=None):
+def DFS(graph, start, end, path=None, paths=None, counter=0):
     """
 
     Depth first traversal from start to end node
 
     """
-    counter = 0
+
     if path is None:
         path = [start]
         paths = []
@@ -78,10 +78,10 @@ def DFS(graph, start, end, path=None, paths=None):
         paths.append(path)
     else:
         for node in graph[start]:
-            if counter > 10:
+            if counter > 100:
                 raise RuntimeError("Either start/stop not correct or recursion too deep")
             if node not in path:
-                DFS(graph, node, end, path, paths)
+                DFS(graph, node, end, path, paths, counter)
     return paths
 
 
@@ -130,7 +130,7 @@ def visualize_graph(graphtype, graphcomp, graph, nodeinf, start, stop, outf="pdf
             for child in graph[parent]:
                 f.edge(parent, child)
 
-    f.render(filename=f"{graphtype}_{start}_{stop}")
+    f.render(filename=f"static/{graphtype}_{start}_{stop}")
 
 
 def main():
