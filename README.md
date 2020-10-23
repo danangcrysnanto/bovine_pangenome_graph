@@ -44,7 +44,7 @@ SVs use `{m|b}{sv_number}_{chr}_{pos}` identifier, where `m|b` indicated from bi
 and`{chr}_{pos}` indicated the breakpoint location on the reference genome path. 
 
 - Visualization of the bubbles (SVs) in the graphs. Selected bubbles visualized using `Graphviz` and stored in a combined `{graph}_{b|m}_viz.pdf` file.  
-Script [viz/app.py](viz.app.py) (`options -g {graphtype}`) can be run which will set up a local webserver to scrutinize the SVs in a more detail in an interactive way. 
+Script [app.py](viz/app.py) (`options -g {graphtype}`) can be run which will set up a local webserver to scrutinize the SVs in a more detail in an interactive way. 
 
 
 - Reports in `reports/{graph}` folder. This contains summary of computational resources and the statistics of the graphs

@@ -47,21 +47,37 @@ def resources_stat(assembly):
     return stat_string
 
 
+def core_genome_stat(assembly):
+    core_string = "### *Core - flexible genome analysis*\n\n\n"
+    core_string += "| Pangenome component | Length|Proportion|\n"
+    core_string += "| ------------------- | ------|----------|\n"
+    core_comp = [x.strip().split() for x in open(f"analysis/core_nonref/{assembly}_core_analysis.tsv").readlines()]
+    for param, val in zip(*core_comp):
+        core_string += f"| {param} | {int(val):,} | {int(val) *100 / sum( [int(x) for x in core_comp[1][:2]] ):.2f}%\n"
+    core_string += "\n\n"
+    core_string += f"![Pangenome size as sample increased](analysis/core_nonref/{assembly}_core_flex_sim.png)\n\n\n"
+    return core_string
+
+
 def main():
     args = parse_args()
     assembly = args.assembly
     component = args.component
+
     intro_string = (f"# **Graph generation report for {assembly}**\n\n\n"
                     f"*Generated on {time.strftime('%a %H:%M %d %B %Y' )}*\n\n"
                     "[TOC]\n"
                     "### *Computational resources*\n")
     resources_string = resources_stat(assembly)
     graph_string = graph_stat.graph_stat_report(assembly, component)
-    all_string = intro_string + resources_string + "\n\n\n### *Graph statistics*\n\n\n" + graph_string
-    html = markdown.markdown(all_string, extensions=["tables", "toc"])
+    core_string = core_genome_stat(assembly)
+
+    all_string = intro_string + resources_string + graph_string + "\n\n" + core_string
+
+    html = markdown.markdown(all_string, extensions=["tables", "toc", "markdown_captions"])
     with open(f"reports/{assembly}_report.html", "w", encoding="utf-8") as outfile:
         outfile.write(html)
-        HTML(string=html).write_pdf(f"reports/{assembly}_report.pdf", stylesheets=["report.css"])
+        HTML(string=html, base_url=".").write_pdf(f"reports/{assembly}_report.pdf", stylesheets=["report.css"])
 
 
 if __name__ == "__main__":

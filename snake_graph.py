@@ -20,6 +20,7 @@ rule all:
         expand("analysis/bubble/{asb}_multiallelic_sv.tsv", asb=graphcon),
         expand("analysis/bubble/{asb}_multisv_seq.fa", asb=graphcon),
         expand("reports/{asb}_report.pdf", asb=graphcon),
+        expand("analysis/core_nonref/{asb}_core_analysis.tsv", asb=graphcon),
         expand("analysis/bubble/{asb}_{svtype}_sv_viz.pdf", asb=graphcon, svtype=svlist)
 
 
@@ -102,6 +103,25 @@ rule colour_node:
         """
             {workflow.basedir}/scripts/colour_node.R {wildcards.asb} {params.assemb}
         """
+
+rule identify_core_genome:
+    input:
+        rules.construct_graph.output[1],
+        rules.colour_node.output[1]
+    output:
+        "analysis/core_nonref/{asb}_core_analysis.tsv",
+        multiext("analysis/core_nonref/{asb}_core_flex_sim", ".tsv", ".png", ".pdf")
+    threads: 10
+    resources:
+        mem_mb = 1000,
+        walltime = "01:00"
+    shell:
+        """
+
+            {workflow.basedir}/scripts/run_core_nonref.R -g {wildcards.asb}
+
+        """
+
 
 rule identify_bubble:
     input:

@@ -47,6 +47,7 @@ def edge_classifier(graph):
 def graph_stat_report(assembly, assemb_comp):
     combgraph = Graph()
     graphfile = f"graph/{assembly}_graph.gfa"
+    report_string = "\n\n\n### *Graph statistics*\n\n\n"
     with open(graphfile) as infile:
         for line in infile:
             # add nodes to the graph
@@ -57,8 +58,8 @@ def graph_stat_report(assembly, assemb_comp):
             if line.startswith("L"):
                 edge = Edge.from_rgfa(line=line, nodes=combgraph.nodes)
                 combgraph.add_edges(edge)
-    report_string = ("| Graph parameters | Count | Length (bp) | \n"
-                     "|----|----|----| \n")
+    report_string += ("| Graph parameters | Count | Length (bp) | \n"
+                      "|----|----|----| \n")
     # Add overall graph len
     report_string += f"| All nodes | {len(combgraph.nodes)} | {combgraph.graph_len} | \n"
     all_nodes = node_classifier(combgraph)
