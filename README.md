@@ -21,7 +21,7 @@ Construction of multiple graphs can be specified in the different line e.g.,
 ``` 
 graph1 UCD,OBV,Angus 
 graph2 UCD,Angus 
-```
+``` 
 
 **Output**
 ---

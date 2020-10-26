@@ -104,23 +104,22 @@ rule colour_node:
             {workflow.basedir}/scripts/colour_node.R {wildcards.asb} {params.assemb}
         """
 
-rule identify_core_genome:
+rule identify_core_nonref:
     input:
         rules.construct_graph.output[1],
         rules.colour_node.output[1]
     output:
         "analysis/core_nonref/{asb}_core_analysis.tsv",
-        multiext("analysis/core_nonref/{asb}_core_flex_sim", ".tsv", ".png", ".pdf")
+        "analysis/core_nonref/{asb}_nonref_analysis.tsv",
+        multiext("analysis/core_nonref/{asb}_core_flex_sim", ".tsv", ".png", ".pdf"),
+        multiext("analysis/core_nonref/{asb}_nonref_shared_count", ".png", ".pdf"),
+        multiext("analysis/core_nonref/{asb}_nonref_shared_len", ".png", ".pdf")
     threads: 10
     resources:
         mem_mb = 1000,
         walltime = "01:00"
-    shell:
-        """
-
-            {workflow.basedir}/scripts/run_core_nonref.R -g {wildcards.asb}
-
-        """
+    script:
+        "scripts/run_core_nonref.R"
 
 
 rule identify_bubble:

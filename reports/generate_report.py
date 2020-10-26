@@ -59,6 +59,21 @@ def core_genome_stat(assembly):
     return core_string
 
 
+def nonref_stat(assembly):
+    nonref_string = "### *Non-reference sequences*\n\n\n"
+    nonref_string += "| Non-ref sequences| Node count| Total sequence length|\n"
+    nonref_string += "|------------------|-----------|----------------------|\n"
+    with open(f"analysis/core_nonref/{assembly}_nonref_analysis.tsv") as infile:
+        next(infile)
+        for line in infile:
+            breed, seq_count, seq_len = line.strip().split()
+            nonref_string += f"|{breed}|{int(seq_count):,}|{int(seq_len):,}|\n"
+    nonref_string += "\n\n"
+    nonref_string += f"![Pangenome nonref sharing count](analysis/core_nonref/{assembly}_nonref_shared_count.png)\n\n\n"
+    nonref_string += f"![Pangenome nonref sharing length](analysis/core_nonref/{assembly}_nonref_shared_len.png)\n\n\n"
+    return nonref_string
+
+
 def main():
     args = parse_args()
     assembly = args.assembly
@@ -71,8 +86,9 @@ def main():
     resources_string = resources_stat(assembly)
     graph_string = graph_stat.graph_stat_report(assembly, component)
     core_string = core_genome_stat(assembly)
+    nonref_string = nonref_stat(assembly)
 
-    all_string = intro_string + resources_string + graph_string + "\n\n" + core_string
+    all_string = intro_string + resources_string + graph_string + "\n\n" + core_string + nonref_string
 
     html = markdown.markdown(all_string, extensions=["tables", "toc", "markdown_captions"])
     with open(f"reports/{assembly}_report.html", "w", encoding="utf-8") as outfile:
