@@ -64,20 +64,21 @@ nonref_sharing_pattern <- function (nodemat, graphlen, graphtype, outbase=".") {
     breeds  <- colnames(datsel  %>% select(-conlen, -nodeid))  %>% as.character()
     
     datsel$nonrefcol <- apply(datsel  %>% select(-conlen,-nodeid),
-	      1,
-	      function(x) paste(breeds[x >0], collapse=","))
+			      1,
+	      		     function(x) paste(breeds[x >0], collapse=","))
 
     datsum  <- datsel  %>% group_by(nonrefcol)  %>% summarize(shared_count=n(),
     							      shared_len=sum(conlen))
 
-
+    # plot 
+    theme_set(theme_bw(base_size = 18)+
+        theme(panel.grid = element_blank()))
+    
     pl1 <- ggplot(datsum,aes(x=fct_reorder(nonrefcol,shared_len),y=shared_len/10^6))+
     geom_col(fill="#56B4E9",col="black",size=0.5)+
     geom_text(aes(label=round(shared_len/10^6,2)),hjust=-0.2,size=6)+
     scale_y_continuous(limits=c(0,max(datsum$shared_len)/10^6+5))+
     coord_flip()+
-    theme_set(theme_bw(base_size = 20))+
-    theme(panel.grid = element_blank())+
     labs(x="Bovine assemblies",
        y="Shared non-ref segment lengths (Mb)")
 
@@ -87,8 +88,6 @@ nonref_sharing_pattern <- function (nodemat, graphlen, graphtype, outbase=".") {
     geom_text(aes(label=shared_count),hjust=-0.2,size=6)+
     scale_y_continuous(limits=c(0,max(datsum$shared_count)+5000))+
     coord_flip()+
-    theme_set(theme_bw(base_size = 20))+
-    theme(panel.grid = element_blank())+
     labs(x="Bovine assemblies",
        y="Shared non-ref segment counts")
     
@@ -99,7 +98,4 @@ nonref_sharing_pattern <- function (nodemat, graphlen, graphtype, outbase=".") {
     ggsave(pl2, filename = file.path(outbase, paste0(graphtype,"_nonref_shared_count.png")),width=12, height=10)
     
 }
-
-
-
 

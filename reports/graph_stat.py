@@ -61,21 +61,21 @@ def graph_stat_report(assembly, assemb_comp):
     report_string += ("| Graph parameters | Count | Length (bp) | \n"
                       "|----|----|----| \n")
     # Add overall graph len
-    report_string += f"| All nodes | {len(combgraph.nodes)} | {combgraph.graph_len} | \n"
+    report_string += f"| All nodes | {len(combgraph.nodes):,} | {combgraph.graph_len:,} | \n"
     all_nodes = node_classifier(combgraph)
     # Add ref len
     ref_count = all_nodes[0][0]
     ref_len = all_nodes[0][1]
-    report_string += f"| Reference nodes| {ref_count} | {ref_len}| \n "
+    report_string += f"| Reference nodes| {ref_count:,} | {ref_len:,}| \n "
     nonref_count = sum([values[0] for key, values in all_nodes.items() if key > 0])
     nonref_len = sum([values[1] for key, values in all_nodes.items() if key > 0])
     # Add non-reference graph len
-    report_string += f"| Non-reference nodes| {nonref_count} | {nonref_len}| \n "
+    report_string += f"| Non-reference nodes| {nonref_count:,} | {nonref_len:,}| \n "
     # Add from non-ref from each assembly
     for ind, [key, values] in enumerate(all_nodes.items()):
         if key != 0:
-            report_string += f"|Added from {assemb_comp[ind]}|{values[0]} | {values[1]}| \n"
+            report_string += f"|Added from {assemb_comp[ind]}|{int(values[0]):,} | {int(values[1]):,}| \n"
     # Add edge types
     for key, value in edge_classifier(combgraph).items():
-        report_string += f"|Edge {key}|{value}|0| \n"
+        report_string += f"|Edge {key}|{value:,}|0| \n"
     return report_string

@@ -5,11 +5,13 @@ Generate pdf report from the graph
 """
 
 from pathlib import Path
-import glob
+import os
+import sys
 import re
 import markdown
 import time
 import graph_stat
+import sv_stat
 import argparse
 from weasyprint import HTML
 
@@ -74,12 +76,24 @@ def nonref_stat(assembly):
     return nonref_string
 
 
+def sv_comb(assembly):
+    sv_string = "### *Structural variations analysis*\n\n\n"
+    # add biallelic sv stat
+    sv_string += "*Biallelic variations*\n\n\n"
+    sv_string += sv_stat.get_sv_stat(assembly=assembly, svmode="biallelic")
+    # add multiallelic sv stat
+    sv_string += "\n\n\n"
+    sv_string += "*Multiallelic variations*\n\n\n"
+    sv_string += sv_stat.get_sv_stat(assembly=assembly, svmode="multiallelic")
+    return sv_string
+
+
 def main():
     args = parse_args()
     assembly = args.assembly
     component = args.component
 
-    intro_string = (f"# **Graph generation report for {assembly}**\n\n\n"
+    intro_string = (f"# **Graph construction report for {assembly}**\n\n\n"
                     f"*Generated on {time.strftime('%a %H:%M %d %B %Y' )}*\n\n"
                     "[TOC]\n"
                     "### *Computational resources*\n")
@@ -87,13 +101,22 @@ def main():
     graph_string = graph_stat.graph_stat_report(assembly, component)
     core_string = core_genome_stat(assembly)
     nonref_string = nonref_stat(assembly)
+    sv_string = sv_comb(assembly)
 
-    all_string = intro_string + resources_string + graph_string + "\n\n" + core_string + nonref_string
+    all_string = (intro_string +
+                  resources_string +
+                  graph_string +
+                  "\n\n" + core_string +
+                  nonref_string +
+                  sv_string)
 
     html = markdown.markdown(all_string, extensions=["tables", "toc", "markdown_captions"])
+
+    scriptfold = os.path.dirname(os.path.realpath(__file__))
     with open(f"reports/{assembly}_report.html", "w", encoding="utf-8") as outfile:
         outfile.write(html)
-        HTML(string=html, base_url=".").write_pdf(f"reports/{assembly}_report.pdf", stylesheets=["report.css"])
+        HTML(string=html, base_url=".").write_pdf(
+            f"reports/{assembly}_report.pdf", stylesheets=[f"{scriptfold}/report.css"])
 
 
 if __name__ == "__main__":
