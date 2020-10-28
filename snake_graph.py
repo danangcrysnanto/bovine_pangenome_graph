@@ -226,7 +226,7 @@ rule visualize_sv:
     shell:
         """
 
-            {workflow.basedir}/viz/sv_viz.py -g {wildcards.asb} -c {params.assemb} -m {wildcards.svtype}
+            {workflow.basedir}/visualize/sv_viz.py -g {wildcards.asb} -c {params.assemb} -m {wildcards.svtype}
 
         """
 

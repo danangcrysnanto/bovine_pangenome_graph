@@ -11,7 +11,8 @@
 
  table {
 	 width: 80%;
-	 border-collapse: collapse
+	 border-collapse: collapse;
+	 page-break-inside: avoid;
  }
 
  th {

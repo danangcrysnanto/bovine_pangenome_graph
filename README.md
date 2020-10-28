@@ -1,6 +1,14 @@
 # Bovine Pangenome Graph
 
-Snakemake pipeline for bovine pangenome graphs construction
+Pipeline to integrate multiple assemblies into a graph representation.
+This pipeline wraps the functionality [Minigraph](https://github.com/lh3/minigraph) for genome graph construction. 
+We add the utility to labels nodes with the assemblies it derives, which crucial for many pangenome analyses. 
+Analyses which are common in pangenome analyses were also performed, which includes:    
+- Determination of core and flexible genome    
+- Analysis of non-reference sequences    
+- Extraction of the structural variations     
+Developed for analysis of bovine genomes, but should be applicable to the other species as well.      
+
 
 **Requirements**
 ---
@@ -44,11 +52,11 @@ SVs use `{m|b}{sv_number}_{chr}_{pos}` identifier, where `m|b` indicated from bi
 and`{chr}_{pos}` indicated the breakpoint location on the reference genome path. 
 
 - Visualization of the bubbles (SVs) in the graphs. Selected bubbles visualized using `Graphviz` and stored in a combined `{graph}_{b|m}_viz.pdf` file.  
-Script [app.py](viz/app.py) (`options -g {graphtype}`) can be run which will set up a local webserver to scrutinize the SVs in a more detail in an interactive way. 
+Script [app.py](viz/app.py) (`options -g {graphtype}`) can be run which will set up a local webserver to inspect SVs in a more detailed and in an interactive way. 
 
 
-- Reports in `reports/{graph}` folder. This contains summary of computational resources and the statistics of the graphs
-generated. Will output a single pdf from each constructed graph. See the example [Here](reports/graph5_report.pdf)
+- Reports in `reports/{graph}` folder. This contains summary of **computational** resources, statistics of **core/flexible genome**, **non-reference sequences** and **structural variations** derived from graphs. 
+Will output a single pdf from each constructed graph. See the example [Here](reports/graph5_report.pdf).
 
 
  
