@@ -21,7 +21,7 @@ def parse_args():
 def generate_edges(ingraph):
     # databose on graph edges
     graph = defaultdict(list)
-    with open(f"graph/{ingraph}_graph_link.gfa") as infile:
+    with open(f"graph/{ingraph}_graph_link.tsv") as infile:
         for line in infile:
             if line.startswith("L"):
                 link, parent, strand1, child, strand2, *_ = line.strip().split()

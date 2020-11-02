@@ -23,8 +23,9 @@ def main():
     graph = graph_viz.generate_edges(graphtype)
     nodeinf = graph_viz.graph_info(graphtype)
 
-    f = open(f"analysis/bubble/{graphtype}_{mutype}_sv.tsv")
-    lines = f.readlines()
+    print(f"analysis/bubble/{graphtype}_{mutype}_sv.tsv")
+    infile = open(f"analysis/bubble/{graphtype}_{mutype}_sv.tsv")
+    lines = infile.readlines()
 
     merger = PdfFileMerger(strict=False)
     selsamp = sample(range(0, len(lines)), 500)

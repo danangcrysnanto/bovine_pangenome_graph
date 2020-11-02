@@ -34,10 +34,10 @@ def chain_node(graph, paths):
     """
 
     chainstrand = []
-    for ind in range(1, len(paths)-1):
-        prevnode = paths[ind-1]
+    for ind in range(1, len(paths) - 1):
+        prevnode = paths[ind - 1]
         curnode = paths[ind]
-        nextnode = paths[ind+1]
+        nextnode = paths[ind + 1]
         strandprev = graph[prevnode][curnode][-1]
         strandnext = graph[curnode][nextnode][0]
         if strandprev == strandnext:
@@ -51,7 +51,7 @@ def chain_node(graph, paths):
             elif ind == 1:
                 chainstrand.extend(graph[prevnode][curnode])
             # when at the end add the current and next node
-            elif ind == len(paths)-2:
+            elif ind == len(paths) - 2:
                 chainstrand.extend(graph[curnode][nextnode])
             # otherwise add only the current node
             else:
@@ -91,7 +91,7 @@ def get_sv_seq(grseq, paths, chainstrand, ):
                     grseq[path])
         else:
             # add 100 bp ref at the end of the path
-            if ind == (len(paths)-1):
+            if ind == (len(paths) - 1):
                 try:
                     totseq += grseq[path][:100] if chainstrand[2] == "+" else revcomp(grseq[path])[
                         :100]
@@ -114,12 +114,12 @@ if __name__ == "__main__":
     multiseq = open(f"analysis/bubble/{assembly}_multisv_seq.fa", "a")
 
     with open(f"analysis/bubble/{assembly}_multiallelic_sv.tsv") as infile:
+        sv_count = 0
         for line in infile:
             line_comp = line.strip().split()
             # 1_1579557       392     482     AltIns  s54,s55,s140149,s57
             pos, reflen, nonreflen, svtype, paths = line_comp
             paths = paths.split(",")
-            sv_count = 0
             if svtype != "Deletions" and int(nonreflen) > 100:
                 # chain node with correct orientation
                 chainstrand, strandprev, strandnext = chain_node(graph, paths)

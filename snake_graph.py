@@ -1,27 +1,50 @@
 #!/usr/bin/env python
 
 import pandas as pd
+import sys
 configfile: srcdir("config/config.yaml")
 workdir: config["workdir"]
 
 
-datstat = pd.read_csv(srcdir("config/graph_comp.tsv"), sep=" ", header=None, names=["assemb", "ascomp"])
+datstat = pd.read_csv(srcdir("config/graph_comp.tsv"),
+                      sep=" ",
+                      header=None,
+                      names=["assemb", "ascomp"])
 
 graphcon = list(datstat["assemb"])
 svlist = ["biallelic", "multiallelic"]
+reflist = [x.split(",")[0] for x in datstat.loc[:, "ascomp"]]
+
+# jobs without submitting to cluster
+localrules: combine_sv, create_extended_ref
+
+# check whether want to run the rna_seq pipeline
+
+rna_out = []
+if config["rna_seq"]:
+    rna_out.extend(expand("analysis/bubble/{asb}_nonrefsv.fa.masked", asb=graphcon))
+    rna_out.extend(expand("graph/{ref}+{asb}.fa", zip, ref=reflist, asb=graphcon))
+
+    # add wildcards from animal in transcriptome
+    rna_anims, = glob_wildcards(f"{config['rna_basedir']}/{{rna_anims}}_qc_R1.fq.gz")
+    if not rna_anims:
+        sys.exit("No transcriptome data found. Possibly path is not correct")
+
+    # rna_out.extend(expand(["rna_seq/aligned/{asb}/{rna_anims}_{asb}.bam", asb=graphcon, rna_anims=rna_anims))
+    rna_out.extend(expand(
+        [f"rna_seq/aligned/{ref}_{asb}/{{rna_anims}}_{asb}.bam" for ref, asb in zip(reflist, graphcon)], rna_anims=rna_anims))
 
 
 rule all:
     input:
         expand("analysis/colour_node/{asb}_nodecol.tsv", asb=graphcon),
         expand("analysis/colour_node/{asb}_nodemat.tsv", asb=graphcon),
-        expand("analysis/bubble/{asb}_biallelic_sv.tsv", asb=graphcon),
-        expand("analysis/bubble/{asb}_bialsv_seq.fa", asb=graphcon),
-        expand("analysis/bubble/{asb}_multiallelic_sv.tsv", asb=graphcon),
-        expand("analysis/bubble/{asb}_multisv_seq.fa", asb=graphcon),
+        expand("analysis/bubble/{asb}_nonrefsv.fa", asb=graphcon),
+        expand("analysis/bubble/{asb}_bubble_annot.tsv", asb=graphcon),
         expand("reports/{asb}_report.pdf", asb=graphcon),
         expand("analysis/core_nonref/{asb}_core_analysis.tsv", asb=graphcon),
-        expand("analysis/bubble/{asb}_{svtype}_sv_viz.pdf", asb=graphcon, svtype=svlist)
+        expand("analysis/bubble/{asb}_{svtype}_sv_viz.pdf", asb=graphcon, svtype=svlist),
+        rna_out
 
 
 def get_assemb(assemb):
@@ -82,7 +105,7 @@ rule comb_coverage:
     shell:
         """
 
-            {workflow.basedir}/scripts/comb_coverage.py -g {wildcards.asb} -a {params.anims} 
+            {workflow.basedir}/scripts/comb_coverage.py -g {wildcards.asb} -a {params.anims}
 
         """
 
@@ -128,7 +151,8 @@ rule identify_bubble:
     output:
         "analysis/bubble/{asb}_bubble.tsv",
         "analysis/bubble/{asb}_biallelic_bubble.tsv",
-        "analysis/bubble/{asb}_multiallelic_bubble.tsv"
+        "anlaysis/bubble/{asb}_multiallelic_bubble.tsv",
+        "analysis/bubble/{asb}_bubble.bed"
     threads: 10
     resources:
         mem_mb = 2000,
@@ -142,94 +166,14 @@ rule identify_bubble:
 
         awk '$5>2 && $5 < 8 {{ print $1,$2,$4,$5,$12 }}' {output[0]} > {output[2]}
 
-
+        awk '{print $1,$2,$2+1,$1"_"$2}' OFS="\t" {output[0]} > {output[3]}
         """
 
+# Add workflow for sv analysis
+include: "subworkflows/sv_analysis.py"
 
-rule collect_biallelic_sv:
-    input:
-        "graph/{asb}_graph_len.tsv",
-        "analysis/bubble/{asb}_biallelic_bubble.tsv"
-    output:
-        "analysis/bubble/{asb}_biallelic_sv.tsv"
-    threads: 10
-    resources:
-        mem_mb = 2000,
-        walltime = "01:00"
-    shell:
-        """
-
-            {workflow.basedir}/scripts/get_bialsv.py -a {wildcards.asb} > {output}
-
-        """
-
-rule extract_bialseq:
-    input:
-        "graph/{asb}_graph.gfa",
-        rules.collect_biallelic_sv.output
-    output:
-        "analysis/bubble/{asb}_bialsv_seq.fa"
-    threads: 10
-    resources:
-        mem_mb = 1000,
-        walltime = "00:30"
-    shell:
-        """
-
-          {workflow.basedir}/scripts/get_bialseq.py -a {wildcards.asb}
-
-        """
-
-rule collect_multiallelic_sv:
-    input:
-        "graph/{asb}_graph_len.tsv",
-        "analysis/bubble/{asb}_multiallelic_bubble.tsv",
-        "analysis/colour_node/{asb}_nodecol.tsv"
-    output:
-        "analysis/bubble/{asb}_multiallelic_sv.tsv"
-    threads: 10
-    resources:
-        mem_mb = 2000,
-        walltime = "01:00"
-    shell:
-        """
-            {workflow.basedir}/scripts/get_multisv.py -a {wildcards.asb} > {output}
-        """
-
-rule extract_multisv:
-    input:
-        "graph/{asb}_graph.gfa",
-        rules.collect_multiallelic_sv.output
-    output:
-        "analysis/bubble/{asb}_multisv_seq.fa"
-    threads: 10
-    resources:
-        mem_mb = 2000,
-        walltime = "00:30"
-    shell:
-        """
-            {workflow.basedir}/scripts/get_multiseq.py -a {wildcards.asb}
-        """
-
-rule visualize_sv:
-    input:
-        rules.collect_biallelic_sv.output,
-        rules.collect_multiallelic_sv.output,
-        rules.construct_graph.output
-    output: "analysis/bubble/{asb}_{svtype}_sv_viz.pdf"
-    threads: 10
-    params:
-        assemb = lambda wildcards: get_assemb(wildcards.asb)
-    resources:
-        mem_mb = 1000,
-        walltime = "01:00"
-    shell:
-        """
-
-            {workflow.basedir}/visualize/sv_viz.py -g {wildcards.asb} -c {params.assemb} -m {wildcards.svtype}
-
-        """
-
+# Add workflow for functional analysis
+include: "subworkflows/rnaseq_analysis.py"
 
 rule generate_report:
     input:
