@@ -27,13 +27,14 @@ if config["rna_seq"]:
 
     # add wildcards from animal in transcriptome
     rna_anims, = glob_wildcards(f"{config['rna_basedir']}/{{rna_anims}}_qc_R1.fq.gz")
+    rna_sel = rna_anims[:2]
     if not rna_anims:
         sys.exit("No transcriptome data found. Possibly path is not correct")
 
     # rna_out.extend(expand(["rna_seq/aligned/{asb}/{rna_anims}_{asb}.bam", asb=graphcon, rna_anims=rna_anims))
     rna_out.extend(expand(
-        [f"rna_seq/aligned/{ref}_{asb}/{{rna_anims}}_{asb}.bam" for ref, asb in zip(reflist, graphcon)], rna_anims=rna_anims))
-
+        [f"rna_seq/aligned/{ref}_{asb}/{{rna_anims}}_{asb}.bam" for ref, asb in zip(reflist, graphcon)], rna_anims=rna_sel))
+    rna_out.extend(expand("rna_seq/gene_model/{asb}_nonref_augustus.gff", asb=graphcon))
 
 rule all:
     input:
@@ -172,8 +173,9 @@ rule identify_bubble:
 # Add workflow for sv analysis
 include: "subworkflows/sv_analysis.py"
 
-# Add workflow for functional analysis
-include: "subworkflows/rnaseq_analysis.py"
+if config["rna_seq"]:
+    # Add workflow for functional analysis
+    include: "subworkflows/rnaseq_analysis.py"
 
 rule generate_report:
     input:

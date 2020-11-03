@@ -7,7 +7,12 @@ Analyses which are common in pangenome analyses were also performed, which inclu
 - Determination of core and flexible genome    
 - Analysis of non-reference sequences    
 - Extraction of the structural variations     
+
+
 Developed for analysis of bovine genomes, but should be applicable to the other species as well.      
+
+*Under active development*
+
 
 
 **Requirements**
