@@ -15,26 +15,14 @@ graphcon = list(datstat["assemb"])
 svlist = ["biallelic", "multiallelic"]
 reflist = [x.split(",")[0] for x in datstat.loc[:, "ascomp"]]
 
-# jobs without submitting to cluster
+# jobs without submission to cluster
 localrules: combine_sv, create_extended_ref
 
-# check whether want to run the rna_seq pipeline
-
-rna_out = []
-if config["rna_seq"]:
-    rna_out.extend(expand("analysis/bubble/{asb}_nonrefsv.fa.masked", asb=graphcon))
-    rna_out.extend(expand("graph/{ref}+{asb}.fa", zip, ref=reflist, asb=graphcon))
-
-    # add wildcards from animal in transcriptome
-    rna_anims, = glob_wildcards(f"{config['rna_basedir']}/{{rna_anims}}_qc_R1.fq.gz")
-    rna_sel = rna_anims[:2]
-    if not rna_anims:
-        sys.exit("No transcriptome data found. Possibly path is not correct")
-
-    # rna_out.extend(expand(["rna_seq/aligned/{asb}/{rna_anims}_{asb}.bam", asb=graphcon, rna_anims=rna_anims))
-    rna_out.extend(expand(
-        [f"rna_seq/aligned/{ref}_{asb}/{{rna_anims}}_{asb}.bam" for ref, asb in zip(reflist, graphcon)], rna_anims=rna_sel))
-    rna_out.extend(expand("rna_seq/gene_model/{asb}_nonref_augustus.gff", asb=graphcon))
+# parse optional output file
+include: "subworkflows/pipeline_output.py"
+rna_anims, rna_out = rna_analysis_output(include_rna_pipeline=config["rna_seq"])
+# rna_anims = rna_anims[:3]
+# rna_out = rna_out[:3]
 
 rule all:
     input:
@@ -62,8 +50,8 @@ rule construct_graph:
         "graph/{asb}_graph_link.tsv"
     threads: 10
     resources:
-        mem_mb = 10000,
-        walltime = "00:30"
+        mem_mb = 12000,
+        walltime = "01:00"
     shell:
         """
 
@@ -144,31 +132,6 @@ rule identify_core_nonref:
         walltime = "01:00"
     script:
         "scripts/run_core_nonref.R"
-
-
-rule identify_bubble:
-    input:
-        "graph/{asb}_graph.gfa"
-    output:
-        "analysis/bubble/{asb}_bubble.tsv",
-        "analysis/bubble/{asb}_biallelic_bubble.tsv",
-        "anlaysis/bubble/{asb}_multiallelic_bubble.tsv",
-        "analysis/bubble/{asb}_bubble.bed"
-    threads: 10
-    resources:
-        mem_mb = 2000,
-        walltime = "01:00"
-    shell:
-        """
-
-        gfatools bubble {input} > {output[0]}
-
-        awk '$5==2 {{ print $1,$2,$4,$5,$12 }}' {output[0]} > {output[1]}
-
-        awk '$5>2 && $5 < 8 {{ print $1,$2,$4,$5,$12 }}' {output[0]} > {output[2]}
-
-        awk '{print $1,$2,$2+1,$1"_"$2}' OFS="\t" {output[0]} > {output[3]}
-        """
 
 # Add workflow for sv analysis
 include: "subworkflows/sv_analysis.py"

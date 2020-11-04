@@ -4,8 +4,6 @@ import pandas as pd
 
 def get_sv_stat(assembly, svmode="biallelic"):
 
-    #basedir = "/cluster/work/pausch/danang/pangenome_nonref/data/hybrid_assem/assembly/graph_pipe/compare_assembly/analysis/bubble"
-    #basedir = "/cluster/work/pausch/danang/pangenome_nonref/data/hybrid_assem/assembly/graph_pipe/compare_assembly/analysis/bubble"
     datfile = f"analysis/bubble/{assembly}_{svmode}_sv.tsv"
 
     if svmode == "biallelic":

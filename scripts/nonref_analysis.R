@@ -35,8 +35,11 @@ calculate_nonref <- function(nodemat, graphlen, graphtype, outbase = ".") {
 			   	     length_segment=sum(conlen))
 
    # do not include the reference assembly
-    datout   <- datout[-which.min(datout$no_segment),]
-    
+    refassemb  <- colnames(datmat)[2]
+    #datout   <- datout[-which.min(datout$no_segment),]
+    datout   <- datout  %>% filter(assembly != refassemb)   
+
+
     outfile  <- file.path(outbase, paste0(graphtype, "_nonref_analysis.tsv"))
 
     write.table(datout, file=outfile, quote = FALSE, row.names=FALSE)

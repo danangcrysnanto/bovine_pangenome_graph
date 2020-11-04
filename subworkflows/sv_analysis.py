@@ -1,3 +1,27 @@
+rule identify_bubble:
+    input:
+        "graph/{asb}_graph.gfa"
+    output:
+        "analysis/bubble/{asb}_bubble.tsv",
+        "analysis/bubble/{asb}_biallelic_bubble.tsv",
+        "analysis/bubble/{asb}_multiallelic_bubble.tsv",
+        "analysis/bubble/{asb}_bubble.bed"
+    threads: 10
+    resources:
+        mem_mb = 2000,
+        walltime = "01:00"
+    shell:
+        """
+
+        gfatools bubble {input} > {output[0]}
+
+        awk '$5==2 {{ print $1,$2,$4,$5,$12 }}' {output[0]} > {output[1]}
+
+        awk '$5>2 && $5 < 8 {{ print $1,$2,$4,$5,$12 }}' {output[0]} > {output[2]}
+
+        awk '{{ print $1,$2,$2+1,$1"_"$2 }}' OFS="\t" {output[0]} > {output[3]}
+        """
+
 rule collect_biallelic_sv:
     input:
         "graph/{asb}_graph_len.tsv",

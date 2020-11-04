@@ -28,7 +28,7 @@ def resources_stat(assembly):
     # get the last modified log file
     ak = sorted(Path('logs/construct_graph').glob(pattern=f"asb-{assembly}_*.out"), key=lambda x: x.stat().st_mtime)
 
-    with open(ak[0]) as infile:
+    with open(ak[-1]) as infile:
         stat_string = (
             "| Statistics | Val(Mb/sec)| Val(GB/mins)|\n"
             "|----|----|----|\n")

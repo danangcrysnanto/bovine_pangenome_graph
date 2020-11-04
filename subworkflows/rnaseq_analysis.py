@@ -11,7 +11,7 @@ rule repeat_mask:
         walltime = "04:00"
     shell:
         """
-            RepeatMasker -no_is -species cow {input}
+            RepeatMasker -q -no_is -species cow {input}
         """
 
 
@@ -57,13 +57,14 @@ rule map_transcriptome:
     threads: 10
     resources:
         mem_mb = 5000,
-        walltime = "04:00"
+        walltime = "04:00",
+        disk_scratch = 50
     shell:
         """
 
         hisat2 -x rna_seq/reference/{wildcards.ref}+{wildcards.asb} -1 {input.rna1} -2 {input.rna2} |
         samtools view -hu |
-        samtools sort -@ 10 -O BAM -o {output} -
+        samtools sort -T $TMPDIR -@ 10 -O BAM -o {output} -
 
 
         """
@@ -72,6 +73,7 @@ rule predict_gene_model:
     input:
         rules.repeat_mask.output
     output:
+        "rna_seq/gene_model/{asb}_nonref_augustus.out",
         "rna_seq/gene_model/{asb}_nonref_augustus.gff"
     threads: 10
     resources:
@@ -84,8 +86,9 @@ rule predict_gene_model:
         """
 
 
-        augustus --species=human --UTR=on  {input} > {output}
+        augustus --species=human --UTR=on  {input} > {output[0]}
 
+        grep -v "#" {output[0]} > {output[1]}
 
         """
 
@@ -95,8 +98,8 @@ rule assemble_transcript:
         bam = "rna_seq/aligned/{ref}_{asb}/{rna_anims}_{asb}.bam",
         gffpred = "rna_seq/gene_model/{asb}_nonref_augustus.gff"
     output:
-        "rna_seq/transcript_assembly/{asb}/{rna_anims}/{asb}_{rna_anims}_temp_transcript",
-        "rna_seq/transcript_assembly/{asb}/{rna_anims}/{asb}_{rna_anims}_temp_abundance"
+        "rna_seq/transcript_assembly/{asb}/{rna_anims}/{ref}+{asb}_{rna_anims}_temp_transcript",
+        "rna_seq/transcript_assembly/{asb}/{rna_anims}/{ref}+{asb}_{rna_anims}_temp_abundance"
     threads: 10
     resources:
         mem_mb = 5000,
@@ -114,11 +117,11 @@ rule assemble_transcript:
 rule merge_annotation:
     input:
         allanims = expand(
-            "rna_seq/transcript_assembly/{{asb}}/{rna_anims}/{{asb}}_{rna_anims}_temp_transcript", rna_anims=rna_anims)
+            "rna_seq/transcript_assembly/{{asb}}/{rna_anims}/{{ref}}+{{asb}}_{rna_anims}_temp_transcript", rna_anims=rna_anims),
         gffpred = "rna_seq/gene_model/{asb}_nonref_augustus.gff"
     output:
-        "rna_seq/transcript_assembly/{asb}/{asb}_anims.tsv",
-        "rna_seq/transcript_assembly/{asb}/{asb}_comb.gff"
+        "rna_seq/transcript_assembly/{asb}/{ref}+{asb}_anims.tsv",
+        "rna_seq/transcript_assembly/{asb}/{ref}+{asb}_comb.gff"
     threads: 10
     resources:
         mem_mb = 5000,
@@ -128,7 +131,8 @@ rule merge_annotation:
     shell:
         """
 
-        echo {input.allanims} > {output[0]}
+        echo {input.allanims} | tr ' ' '\\n' > {output[0]}
+
         stringtie --merge -G {input.gffpred} -G {params.gffinput} -l {wildcards.asb}_comb -o {output[1]} {output[0]}
 
         """
@@ -136,10 +140,10 @@ rule merge_annotation:
 rule calculate_expression:
     input:
         bam = "rna_seq/aligned/{ref}_{asb}/{rna_anims}_{asb}.bam",
-        gffmerged = "rna_seq/transcript_assembly/{asb}/{asb}_comb.gff"
+        gffmerged = "rna_seq/transcript_assembly/{asb}/{ref}+{asb}_comb.gff"
     output:
-        "rna_seq/transcript_assembly/{asb}/{rna_anims}/{asb}_{rna_anims}_merged_transcript",
-        "rna_seq/transcript_assembly/{asb}/{rna_anims}/{asb}_{rna_anims}_merged_abundance"
+        "rna_seq/transcript_assembly/{asb}/{rna_anims}/{ref}+{asb}_{rna_anims}_merged_transcript",
+        "rna_seq/transcript_assembly/{asb}/{rna_anims}/{ref}+{asb}_{rna_anims}_merged_abundance"
     threads: 10
     resources:
         mem_mb = 5000,
