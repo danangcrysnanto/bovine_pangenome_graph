@@ -69,6 +69,47 @@ rule map_transcriptome:
 
         """
 
+rule generate_hisat_linear:
+    input:
+        f"assembly/{config['reference']}.fa"
+    output:
+        touch(f"rna_seq/reference/{config['reference']}_hisat_index_finished")
+    threads: 10
+    resources:
+        mem_mb = 5000,
+        walltime = "04:00"
+    params:
+        reference = config["reference"]
+    shell:
+        """
+            hisat2-build -p {threads} {input} rna_seq/reference/{params.reference}
+
+        """
+
+rule map_linear_transcriptome:
+    input:
+        rna1 = config["rna_basedir"] + "/{rna_anims}_qc_R1.fq.gz",
+        rna2 = config["rna_basedir"] + "/{rna_anims}_qc_R2.fq.gz",
+        refind = rules.generate_hisat_linear.output
+    output:
+        f"rna_seq/aligned/{config['reference']}/{{rna_anims}}_{config['reference']}.bam"
+    threads: 10
+    resources:
+        mem_mb = 5000,
+        walltime = "04:00",
+        disk_scratch = 50
+    params:
+        reference = config["reference"]
+    shell:
+        """
+
+        hisat2 -x rna_seq/reference/{params.reference} -1 {input.rna1} -2 {input.rna2} |
+        samtools view -hu |
+        samtools sort -T $TMPDIR -@ 10 -O BAM -o {output} -
+
+
+        """
+
 rule predict_gene_model:
     input:
         rules.repeat_mask.output
@@ -91,6 +132,13 @@ rule predict_gene_model:
         grep -v "#" {output[0]} > {output[1]}
 
         """
+
+rule analyze_gene_model:
+    input:
+        rules.predict_gene_model.output[1]
+    output:
+        "rna_seq/gene_model/{asb}_predict_summary.tsv"
+    script: "../scripts/gene_model_analysis.R"
 
 
 rule assemble_transcript:

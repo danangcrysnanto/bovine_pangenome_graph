@@ -7,7 +7,9 @@ Analyses which are common in pangenome analyses were also performed, which inclu
 - Determination of core and flexible genome    
 - Analysis of non-reference sequences    
 - Extraction of the structural variations     
-See the example [Here](reports/graph5_report.pdf) for the report. 
+- Novel genes predictions and corresponding expression level.        
+
+See the example [Here](reports/taurus_report.pdf) for the report. 
 
 Developed for analysis of bovine genomes, but should be applicable to the other species as well.      
 
@@ -62,7 +64,7 @@ Script [app.py](viz/app.py) (`options -g {graphtype}`) can be run which will set
 - *Optional* if including the functional analysis: prediction of novel /non-reference genes with corresponding expression levels from transcriptome. 
 
 - Reports in `reports/{graph}` folder. This contains summary of **computational** resources, statistics of **core/flexible genome**, **non-reference sequences** and **structural variations** derived from graphs. 
-Will output a single pdf from each constructed graph. See the example [Here](reports/graph5_report.pdf).
+Will output a single pdf from each constructed graph. See the example [Here](reports/taurus_report.pdf).
 
 
  

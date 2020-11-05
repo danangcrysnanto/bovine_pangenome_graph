@@ -12,15 +12,18 @@ import markdown
 import time
 import graph_stat
 import sv_stat
+import rna_stat
 import argparse
 from weasyprint import HTML
+from distutils.util import strtobool
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("-a", "--assembly", help="Graph to report")
-    parser.add_argument("-c", "--component", help="Graph to report", nargs="+")
+    parser.add_argument("-c", "--component", help="Assembly that are part of the graphs", nargs="+")
+    parser.add_argument("-r", "--includerna", help="Including RNA analysis or not", type=strtobool)
     return parser.parse_args()
 
 
@@ -78,14 +81,31 @@ def nonref_stat(assembly):
 
 def sv_comb(assembly):
     sv_string = "### *Structural variations analysis*\n\n\n"
+    # add annotation stat
+    sv_string += "*Annotations stats*\n\n\n"
+    sv_string += sv_stat.get_sv_annot_stat(assembly=assembly)
     # add biallelic sv stat
+    sv_string += "\n\n\n"
     sv_string += "*Biallelic variations*\n\n\n"
     sv_string += sv_stat.get_sv_stat(assembly=assembly, svmode="biallelic")
     # add multiallelic sv stat
     sv_string += "\n\n\n"
     sv_string += "*Multiallelic variations*\n\n\n"
     sv_string += sv_stat.get_sv_stat(assembly=assembly, svmode="multiallelic")
+    sv_string += "\n\n\n"
     return sv_string
+
+
+def rna_comb(assembly, include_rna=True):
+    if include_rna:
+        rna_string = "### *Functional analysis*\n\n\n"
+        # add gene model prediction
+        rna_string += " *Gene model prediction*\n\n\n"
+        rna_string += rna_stat.gene_model_string(assembly)
+
+        return rna_string
+    else:
+        return ""
 
 
 def main():
@@ -102,13 +122,15 @@ def main():
     core_string = core_genome_stat(assembly)
     nonref_string = nonref_stat(assembly)
     sv_string = sv_comb(assembly)
+    rna_string = rna_comb(assembly, include_rna=args.includerna)
 
     all_string = (intro_string +
                   resources_string +
                   graph_string +
                   "\n\n" + core_string +
                   nonref_string +
-                  sv_string)
+                  sv_string +
+                  rna_string)
 
     html = markdown.markdown(all_string, extensions=["tables", "toc", "markdown_captions"])
 

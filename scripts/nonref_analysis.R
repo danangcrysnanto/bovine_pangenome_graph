@@ -6,6 +6,7 @@ library("tidyr", warn.conflicts = FALSE)
 library("forcats", warn.conflicts = FALSE)
 library("magrittr", warn.conflicts = FALSE)
 
+# test comment
 #' Given pangenome graph calculate the non-reference sequences grouped by assembly
 #' @param nodemat: matrix of the node colour
 #' @param graphlen: length of nodes in the graphs

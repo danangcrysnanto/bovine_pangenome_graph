@@ -23,4 +23,13 @@ def rna_analysis_output(include_rna_pipeline=True):
 
         rna_out.extend(expand(
             [f"rna_seq/transcript_assembly/{asb}/{{rna_anims}}/{ref}+{asb}_{{rna_anims}}_merged_transcript" for ref, asb in zip(reflist, graphcon)], rna_anims=rna_anims))
+
+        # add result for the gene_prediction
+        rna_out.extend(expand("rna_seq/gene_model/{asb}_predict_summary.tsv", asb=graphcon))
+
+        # add mapping to reference results
+
+        rna_out.extend(expand(
+            f"rna_seq/aligned/{config['reference']}/{{rna_anims}}_{config['reference']}.bam", rna_anims=rna_anims))
+
     return rna_anims, rna_out

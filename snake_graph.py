@@ -16,7 +16,7 @@ svlist = ["biallelic", "multiallelic"]
 reflist = [x.split(",")[0] for x in datstat.loc[:, "ascomp"]]
 
 # jobs without submission to cluster
-localrules: combine_sv, create_extended_ref
+localrules: combine_sv, create_extended_ref, analyze_gene_model
 
 # parse optional output file
 include: "subworkflows/pipeline_output.py"
@@ -147,11 +147,12 @@ rule generate_report:
         "reports/{asb}_report.pdf"
     threads: 10
     params:
-        assemb = lambda wildcards: get_assemb(wildcards.asb)
+        assemb = lambda wildcards: get_assemb(wildcards.asb),
+        include_rna = config["rna_seq"]
     resources:
         mem_mb = 1000,
         walltime = "01:00"
     shell:
         """
-            {workflow.basedir}/reports/generate_report.py -a {wildcards.asb} -c {params.assemb}
+            {workflow.basedir}/reports/generate_report.py -a {wildcards.asb} -r {params.include_rna} -c {params.assemb} 
         """

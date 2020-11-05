@@ -6,7 +6,7 @@ workdir: compare_assembly
 gffinput: assembly/Bos_taurus.ARS-UCD1.2.101.gff3.gz
 
 # Setting for rna-seq analysis
-
 rna_seq: True
+reference: UCD
 rna_basedir: /cluster/work/pausch/danang/pangenome_nonref/data/hybrid_assem/bovine_minigraph/nonref_ins/rna_seq/qc_reads
 

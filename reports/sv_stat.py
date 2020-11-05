@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import pandas as pd
+from collections import defaultdict
 
 
 def get_sv_stat(assembly, svmode="biallelic"):
@@ -31,6 +32,8 @@ def get_sv_stat(assembly, svmode="biallelic"):
 
     datin['mutlen'] = abs(datin.reflen - datin.svlen)
 
+    # length of mutation as non-ref len without flanking sequences
+
     datsum = datin.groupby("mutype").agg(
         count_sv=("svid", 'count'),
         len_sv=("mutlen", sum),
@@ -44,3 +47,27 @@ def get_sv_stat(assembly, svmode="biallelic"):
         sv_string += f"|{mutype}|{count_sv:.0f}|{len_sv:,.0f}|{mean_sv:.0f}|\n"
 
     return sv_string
+
+
+def get_sv_annot_stat(assembly):
+    """
+
+    :assembly: graph whose SV will be annotated
+    :returns: string to report of the SV annotation by gene features
+
+    """
+
+    annot_tally = defaultdict(int)
+
+    with open(f"analysis/bubble/{assembly}_bubble_annot.tsv") as infile:
+        for line in infile:
+            feature = line.strip().split()[1]
+            if feature in ["mRNA", "gene"]:
+                annot_tally["intronic"] += 1
+            else:
+                annot_tally[feature] += 1
+    annot_sv = "| Sequence Features | Count |\n"
+    annot_sv += "|------------------ | ----- |\n"
+    for key, value in annot_tally.items():
+        annot_sv += f"| {key} | {value:,}\n"
+    return annot_sv
