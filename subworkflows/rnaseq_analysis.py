@@ -202,3 +202,41 @@ rule calculate_expression:
         stringtie {input.bam} -e -G {input.gffmerged}  -o {output[0]} -p {threads} -A {output[1]} -B
 
         """
+
+rule merge_expression:
+    input:
+        expand(
+            "rna_seq/transcript_assembly/{{asb}}/{rna_anims}/{{ref}}+{{asb}}_{rna_anims}_merged_abundance", rna_anims=rna_anims)
+    output: "rna_seq/transcript_assembly/{asb}/{ref}+{asb}_expression.tsv"
+    run:
+
+        from os.path import basename
+
+        allfile = iter(input)
+
+        def open_expression_file(procfile):
+            anims = basename(procfile).split("_")[1]
+            datin = pd.read_csv(procfile,
+                                sep="\t",
+                                skiprows=1,
+                                header=None,
+                                usecols=[0, 2, 4, 5, 8],
+                                names=["gene_id", "contigs", "start_pos", "stop_pos", anims])
+            # retain only on the non-reference contigs
+            datin = datin[datin["contigs"].str.contains(r"^[m|b]\d+_\d+_\d+")]
+            return datin
+
+        # process first file
+        combfile = open_expression_file(next(allfile))
+
+        # for the subsequent file merge it with the first file
+
+        for procfile in allfile:
+            anims = basename(procfile).split("_")[1]
+            infile = open_expression_file(procfile)[['gene_id', anims]]
+            combfile = combfile.merge(infile, on="gene_id")
+
+        # save the merged expression
+        combfile.to_csv(str(output),
+                        sep="\t",
+                        index=False)

@@ -32,4 +32,9 @@ def rna_analysis_output(include_rna_pipeline=True):
         rna_out.extend(expand(
             f"rna_seq/aligned/{config['reference']}/{{rna_anims}}_{config['reference']}.bam", rna_anims=rna_anims))
 
+        # add merge expression results
+
+        rna_out.extend([f"rna_seq/transcript_assembly/{asb}/{ref}+{asb}_expression.tsv"
+                        for ref, asb in zip(reflist, graphcon)])
+
     return rna_anims, rna_out

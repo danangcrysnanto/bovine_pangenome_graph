@@ -16,7 +16,7 @@ svlist = ["biallelic", "multiallelic"]
 reflist = [x.split(",")[0] for x in datstat.loc[:, "ascomp"]]
 
 # jobs without submission to cluster
-localrules: combine_sv, create_extended_ref, analyze_gene_model
+localrules: combine_sv, create_extended_ref, analyze_gene_model, merge_expression
 
 # parse optional output file
 include: "subworkflows/pipeline_output.py"
