@@ -102,7 +102,6 @@ def rna_comb(assembly, include_rna=True):
         # add gene model prediction
         rna_string += " *Gene model prediction*\n\n\n"
         rna_string += rna_stat.gene_model_string(assembly)
-
         return rna_string
     else:
         return ""
