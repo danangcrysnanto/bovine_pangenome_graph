@@ -30,6 +30,8 @@ rule all:
         expand("analysis/colour_node/{asb}_nodemat.tsv", asb=graphcon),
         expand("analysis/bubble/{asb}_nonrefsv.fa", asb=graphcon),
         expand("analysis/bubble/{asb}_bubble_annot.tsv", asb=graphcon),
+        expand("analysis/bubble/{asb}_left_breakpoints.bed", asb=graphcon),
+        expand("analysis/bubble/{asb}_breakpoint_annot.tsv", asb=graphcon),
         expand("reports/{asb}_report.pdf", asb=graphcon),
         expand("analysis/core_nonref/{asb}_core_analysis.tsv", asb=graphcon),
         expand("analysis/bubble/{asb}_{svtype}_sv_viz.pdf", asb=graphcon, svtype=svlist),

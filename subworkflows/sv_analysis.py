@@ -122,6 +122,64 @@ rule combine_sv:
             cat {input} > {output}
         """
 
+localrules: create_breakpoint_bed
+rule create_breakpoint_bed:
+    input:
+        bubble_file = "analysis/bubble/{asb}_bubble.tsv",
+        bialsv_file = "analysis/bubble/{asb}_bialsv_stat.tsv",
+        multisv_file = "analysis/bubble/{asb}_multisv_stat.tsv"
+    output:
+        left_bed = "analysis/bubble/{asb}_left_breakpoints.bed",
+        right_bed = "analysis/bubble/{asb}_right_breakpoints.bed"
+    threads: 10
+    resources:
+        mem_mb = 1000,
+        walltime = "00:10"
+    run:
+        # get right breakpoint
+        right_bp = {}
+        with open(input["bubble_file"]) as infile:
+            for line in infile:
+                chromo, left_side, right_side, *_ = line.strip().split()
+                right_bp[f"{chromo}_{left_side}"] = right_side
+        # process the biallelic breakpoints
+
+        def wrote_sv_bed(line, left_file, right_file):
+            sv_comp, *sv_rest = line.strip().split()
+            _, chromo, leftcoord = sv_comp.split("_")
+            leftcoord = int(leftcoord)
+            start_node, *_, stop_node = sv_rest[-2].split(",")
+            left_file.write(f"{chromo}\t{leftcoord-1}\t{leftcoord+1}\t{start_node}\t{stop_node}\t{sv_comp}\n")
+            svid = f"{chromo}_{leftcoord}"
+            rightcoord = int(right_bp[svid])
+            right_file.write(f"{chromo}\t{rightcoord-1}\t{rightcoord+1}\t{start_node}\t{stop_node}\t{sv_comp}\n")
+
+        with open(input["bialsv_file"]) as bialfile, open(input["multisv_file"]) as multifile:
+            with open(output["left_bed"], "a") as left_file, open(output["right_bed"], "a") as right_file:
+                for line in bialfile:
+                    wrote_sv_bed(line, left_file, right_file)
+            # process the multiallelic breakpoints
+                sv_processed = []
+                for line in multifile:
+                    sv_comp, *sv_rest = line.strip().split()
+                    _, chromo, leftcoord = sv_comp.split("_")
+                    svid = f"{chromo}_{leftcoord}"
+                    if svid not in sv_processed:
+                        sv_processed.append(svid)
+                        wrote_sv_bed(line, left_file, right_file)
+
+localrules: annotate_breakpoint
+rule annotate_breakpoint:
+    input:
+        left_bed = rules.create_breakpoint_bed.output[0],
+        right_bed = rules.create_breakpoint_bed.output[1]
+    output:
+        "analysis/bubble/{asb}_breakpoint_annot.tsv"
+    params:
+        gffinput = config["gffinput"]
+    script: "../scripts/annot_breakpoints.py"
+
+
 rule annot_sv:
     input:
         "analysis/bubble/{asb}_bubble.bed"
