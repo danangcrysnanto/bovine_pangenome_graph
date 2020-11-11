@@ -33,6 +33,7 @@ rule all:
         expand("analysis/bubble/{asb}_left_breakpoints.bed", asb=graphcon),
         expand("analysis/bubble/{asb}_breakpoint_annot.tsv", asb=graphcon),
         expand("analysis/bubble/{asb}_exon_viz.pdf", asb=graphcon),
+        expand("rna_seq/gene_mode/{asb}_nonref_agustus_blastp.tsv", asb=graphcon),
         expand("reports/{asb}_report.pdf", asb=graphcon),
         expand("analysis/core_nonref/{asb}_core_analysis.tsv", asb=graphcon),
         expand("analysis/bubble/{asb}_{svtype}_sv_viz.pdf", asb=graphcon, svtype=svlist),

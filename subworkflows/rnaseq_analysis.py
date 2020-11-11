@@ -15,6 +15,31 @@ rule repeat_mask:
         """
 
 
+rule blastx_nonref:
+    input: "analysis/bubble/{asb}_nonrefsv.fa.masked"
+    output: "analysis/bubble/{asb}_nonrefsv_blastx.tsv"
+    threads: 10
+    resources:
+        mem_mb = 5000,
+        walltime = "01:00"
+    params:
+        refprot = config["refprot"]
+    shell:
+        """
+
+        diamond blastx --sensitive --db {params.refprot} --query {input} --threads {threads} \
+                --out {output}.temp --evalue 1e-10 --max-target-seqs 1 --outfmt 6 \
+                qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen salltitles
+
+        # filter blastx result
+
+        sort -k1,1 -k11,11nr -k12,12n  {output}.temp |
+        sort -u -k1,1 --merge |
+        awk '$4/$13>=0.7 && $3>=70' > {output} && rm {output}.temp
+
+        """
+
+
 def get_ref(assemb):
     refgenome = datstat.loc[datstat.assemb == assemb, "ascomp"].iloc[0].split(",")[0]
     return f"assembly/{refgenome}.fa"
@@ -140,6 +165,57 @@ rule analyze_gene_model:
         "rna_seq/gene_model/{asb}_predict_summary.tsv"
     script: "../scripts/gene_model_analysis.R"
 
+
+localrules: create_protein_fa
+rule create_protein_fa:
+    input: "rna_seq/gene_model/{asb}_nonref_augustus.out"
+    output: "rna_seq/gene_model/{asb}_nonref_augustus_prot.fa"
+    run:
+        import re
+
+        with open(input[0]) as infile, open(output[0], "a") as outfile:
+            for line in infile:
+                if line.startswith("# start gene"):
+                    gene_id = line.strip().split()[-1]
+                    contig_id = next(infile).strip().split()[0]
+                    seqname = f">{gene_id}_{contig_id}"
+                elif line.startswith("# protein sequence"):
+                    if re.search(r"([A-Z]+)", line):
+                        protseq = re.search(r"([A-Z]+)", line)[0]
+                        nextline = next(infile)
+                        while not nextline.startswith("# end gene"):
+                            protseq += re.search(r"([A-Z]+)", nextline)[0]
+                            nextline = next(infile)
+                        else:
+                            outfile.write(f"{seqname}\n{protseq}\n")
+
+
+rule blastp_nonref:
+    input: "rna_seq/gene_model/{asb}_nonref_augustus_prot.fa"
+    output: "rna_seq/gene_model/{asb}_nonref_agustus_blastp.tsv"
+    threads: 10
+    resources:
+        mem_mb = 5000,
+        walltime = "01:00"
+    params:
+        refprot = config["refprot"]
+    shell:
+        """
+
+        #create protein fa from augustus results
+
+
+        diamond blastp --more-sensitive --db {params.refprot} --query {input} --threads {threads} \
+                --out {output}.temp --evalue 1e-10 --outfmt 6 \
+                qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen salltitles
+
+        # filter blastx result
+
+        sort -k1,1 -k11,11nr -k12,12n  {output}.temp |
+        sort -u -k1,1 --merge |
+        awk '$4/$13>=0.7 && $3>=70' > {output} && rm {output}.temp
+
+        """
 
 rule assemble_transcript:
     input:
