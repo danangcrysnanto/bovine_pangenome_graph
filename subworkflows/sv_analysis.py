@@ -149,10 +149,12 @@ rule create_breakpoint_bed:
             _, chromo, leftcoord = sv_comp.split("_")
             leftcoord = int(leftcoord)
             start_node, *_, stop_node = sv_rest[-2].split(",")
-            left_file.write(f"{chromo}\t{leftcoord-1}\t{leftcoord+1}\t{start_node}\t{stop_node}\t{sv_comp}\n")
+            left_file.write(
+                (f"{chromo}\t{leftcoord-1}\t{leftcoord+1}\t{start_node}\t{stop_node}\t{sv_comp}\n"))
             svid = f"{chromo}_{leftcoord}"
             rightcoord = int(right_bp[svid])
-            right_file.write(f"{chromo}\t{rightcoord-1}\t{rightcoord+1}\t{start_node}\t{stop_node}\t{sv_comp}\n")
+            right_file.write(
+                (f"{chromo}\t{rightcoord-1}\t{rightcoord+1}\t{start_node}\t{stop_node}\t{sv_comp}\n"))
 
         with open(input["bialsv_file"]) as bialfile, open(input["multisv_file"]) as multifile:
             with open(output["left_bed"], "a") as left_file, open(output["right_bed"], "a") as right_file:
@@ -160,6 +162,7 @@ rule create_breakpoint_bed:
                     wrote_sv_bed(line, left_file, right_file)
             # process the multiallelic breakpoints
                 sv_processed = []
+                mutlist = []
                 for line in multifile:
                     sv_comp, *sv_rest = line.strip().split()
                     _, chromo, leftcoord = sv_comp.split("_")
@@ -193,3 +196,22 @@ rule annot_sv:
         gffinput = config["gffinput"]
     script:
         "../scripts/annot_sv.py"
+
+
+rule visualize_exon:
+    input:
+        bialsv_file = "analysis/bubble/{asb}_bialsv_stat.tsv",
+        multisv_file = "analysis/bubble/{asb}_multisv_stat.tsv",
+        annot_file = "analysis/bubble/{asb}_breakpoint_annot.tsv"
+    output: "analysis/bubble/{asb}_exon_viz.pdf"
+    threads: 10
+    params:
+        assemb = lambda wildcards: get_assemb(wildcards.asb)
+    envmodules:
+        "gcc/4.8.5",
+        "graphviz/2.40.1",
+        "python_cpu/3.7.4"
+    resources:
+        mem_mb = 1000,
+        walltime = "01:00"
+    script: "../visualize/sv_viz_exon.py"

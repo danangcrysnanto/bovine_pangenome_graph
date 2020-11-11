@@ -110,7 +110,7 @@ if __name__ == "__main__":
     right_annot = annotate_breakpoints(breakpointfile=right_file,
                                        annotfile=annotfile)
 
-    # make left and right paired breakpoint annotation
+    # make left and right paired
     for key, values in right_annot.items():
         chromo, pos, start_node, stop_node, featid, geneid = values
         left_annot[key].extend([chromo, pos, featid, geneid])
@@ -118,5 +118,9 @@ if __name__ == "__main__":
     outname = snakemake.output[0]
 
     with open(outname, "a") as outfile:
+        # b1_1_111515 1 111514 s1 s2 intergenic 1 1 111514 intergenic 1
+        outfile.write(
+            (f"svid chromo_left start_left start_node stop_node feature_left gene_left"
+             f" chromo_right start_right feature_right gene_right\n"))
         for key, value in left_annot.items():
             print(key, *value, file=outfile)
