@@ -42,7 +42,7 @@ rule blastx_nonref:
 
 def get_ref(assemb):
     refgenome = datstat.loc[datstat.assemb == assemb, "ascomp"].iloc[0].split(",")[0]
-    return f"assembly/{refgenome}.fa"
+    return f"assembly/{refgenome}_full.fa"
 
 
 rule create_extended_ref:
@@ -96,7 +96,7 @@ rule map_transcriptome:
 
 rule generate_hisat_linear:
     input:
-        f"assembly/{config['reference']}.fa"
+        f"assembly/{config['reference']}_full.fa"
     output:
         touch(f"rna_seq/reference/{config['reference']}_hisat_index_finished")
     threads: 10
