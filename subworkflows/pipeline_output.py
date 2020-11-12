@@ -1,5 +1,39 @@
 #!/usr/bin/env python
 
+
+def core_analysis_output():
+    """
+
+    Construct list for core genome analysis output
+
+    """
+    core_out = []
+
+    core_out.extend(expand("analysis/colour_node/{asb}_nodecol.tsv", asb=graphcon))
+    core_out.extend(expand("analysis/colour_node/{asb}_nodemat.tsv", asb=graphcon))
+    core_out.extend(expand("analysis/core_nonref/{asb}_core_analysis.tsv", asb=graphcon))
+
+    return core_out
+
+
+def sv_analysis_output():
+    """
+
+    Construct list for structural variations output
+
+    """
+
+    sv_out = []
+    sv_out.extend(expand("analysis/bubble/{asb}_nonrefsv.fa", asb=graphcon))
+    sv_out.extend(expand("analysis/bubble/{asb}_{svtype}_sv_viz.pdf", asb=graphcon, svtype=svlist))
+    sv_out.extend(expand("analysis/bubble/{asb}_breakpoint_annot.tsv", asb=graphcon))
+    sv_out.extend(expand("analysis/bubble/{asb}_exon_viz.pdf", asb=graphcon))
+    sv_out.extend(expand("analysis/bubble/{asb}_{svtype}_sv_viz.pdf", asb=graphcon, svtype=svlist))
+    sv_out.extend(expand("rna_seq/gene_mode/{asb}_nonref_agustus_blastp.tsv", asb=graphcon))
+
+    return sv_out
+
+
 def rna_analysis_output(include_rna_pipeline=True):
     """
     Construct output for the rna_analysis pipeline

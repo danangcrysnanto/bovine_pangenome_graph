@@ -27,7 +27,7 @@ rule blastx_nonref:
     shell:
         """
 
-        diamond blastx --sensitive --db {params.refprot} --query {input} --threads {threads} \
+        diamond blastx --more-sensitive --db {params.refprot} --query {input} --threads {threads} \
                 --out {output}.temp --evalue 1e-10 --max-target-seqs 1 --outfmt 6 \
                 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore qlen slen salltitles
 

@@ -18,26 +18,20 @@ reflist = [x.split(",")[0] for x in datstat.loc[:, "ascomp"]]
 # jobs without submission to cluster
 localrules: combine_sv, create_extended_ref, analyze_gene_model, merge_expression
 
-# parse optional output file
+# parse output file
 include: "subworkflows/pipeline_output.py"
+core_out = core_analysis_output()
+sv_out = sv_analysis_output()
 rna_anims, rna_out = rna_analysis_output(include_rna_pipeline=config["rna_seq"])
 # rna_anims = rna_anims[:3]
 # rna_out = rna_out[:3]
 
 rule all:
     input:
-        expand("analysis/colour_node/{asb}_nodecol.tsv", asb=graphcon),
-        expand("analysis/colour_node/{asb}_nodemat.tsv", asb=graphcon),
-        expand("analysis/bubble/{asb}_nonrefsv.fa", asb=graphcon),
-        expand("analysis/bubble/{asb}_bubble_annot.tsv", asb=graphcon),
-        expand("analysis/bubble/{asb}_left_breakpoints.bed", asb=graphcon),
-        expand("analysis/bubble/{asb}_breakpoint_annot.tsv", asb=graphcon),
-        expand("analysis/bubble/{asb}_exon_viz.pdf", asb=graphcon),
-        expand("rna_seq/gene_mode/{asb}_nonref_agustus_blastp.tsv", asb=graphcon),
-        expand("reports/{asb}_report.pdf", asb=graphcon),
-        expand("analysis/core_nonref/{asb}_core_analysis.tsv", asb=graphcon),
-        expand("analysis/bubble/{asb}_{svtype}_sv_viz.pdf", asb=graphcon, svtype=svlist),
-        rna_out
+        core_out,
+        sv_out,
+        rna_out,
+        expand("reports/{asb}_report.pdf", asb=graphcon)
 
 
 def get_assemb(assemb):
