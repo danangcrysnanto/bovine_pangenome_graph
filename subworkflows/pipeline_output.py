@@ -25,11 +25,9 @@ def sv_analysis_output():
 
     sv_out = []
     sv_out.extend(expand("analysis/bubble/{asb}_nonrefsv.fa", asb=graphcon))
-    sv_out.extend(expand("analysis/bubble/{asb}_{svtype}_sv_viz.pdf", asb=graphcon, svtype=svlist))
     sv_out.extend(expand("analysis/bubble/{asb}_breakpoint_annot.tsv", asb=graphcon))
-    sv_out.extend(expand("analysis/bubble/{asb}_exon_viz.pdf", asb=graphcon))
     sv_out.extend(expand("analysis/bubble/{asb}_{svtype}_sv_viz.pdf", asb=graphcon, svtype=svlist))
-    sv_out.extend(expand("rna_seq/gene_mode/{asb}_nonref_agustus_blastp.tsv", asb=graphcon))
+    sv_out.extend(expand("analysis/bubble/{asb}_exon_viz.pdf", asb=graphcon))
 
     return sv_out
 
@@ -70,5 +68,9 @@ def rna_analysis_output(include_rna_pipeline=True):
 
         rna_out.extend([f"rna_seq/transcript_assembly/{asb}/{ref}+{asb}_expression.tsv"
                         for ref, asb in zip(reflist, graphcon)])
+        # add blast results
+
+        rna_out.extend(expand("analysis/bubble/{asb}_nonrefsv_blastx.tsv", asb=graphcon))
+        rna_out.extend(expand("rna_seq/gene_model/{asb}_nonref_agustus_blastp.tsv", asb=graphcon))
 
     return rna_anims, rna_out

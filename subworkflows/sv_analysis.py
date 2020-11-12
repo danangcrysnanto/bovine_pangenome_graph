@@ -39,12 +39,13 @@ rule collect_biallelic_sv:
 
         """
 
-rule extract_bialseq:
+rule extract_bialsv:
     input:
         "graph/{asb}_graph.gfa",
         rules.collect_biallelic_sv.output
     output:
-        "analysis/bubble/{asb}_bialsv_seq.fa"
+        "analysis/bubble/{asb}_bialsv_seq.fa",
+        "analysis/bubble/{asb}_bialsv_stat.tsv"
     threads: 10
     resources:
         mem_mb = 1000,
@@ -77,7 +78,8 @@ rule extract_multisv:
         "graph/{asb}_graph.gfa",
         rules.collect_multiallelic_sv.output
     output:
-        "analysis/bubble/{asb}_multisv_seq.fa"
+        "analysis/bubble/{asb}_multisv_seq.fa",
+        "analysis/bubble/{asb}_multisv_stat.tsv"
     threads: 10
     resources:
         mem_mb = 2000,
