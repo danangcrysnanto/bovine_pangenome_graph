@@ -1,4 +1,4 @@
-workdir: compare_assembly
+workdir: final_graph
 
 # Setting for SV analysis
 # gff always relative to the workdir
@@ -8,7 +8,22 @@ gffinput: assembly/Bos_taurus.ARS-UCD1.2.101.gff3.gz
 # Setting for rna-seq analysis
 rna_seq: True
 reference: UCD
+
 # diamond protein db for blast 
 refprot: /cluster/work/pausch/danang/pangenome_nonref/result/bsw_ucd_new/annot_analysis/refprot/bos_prot
 rna_basedir: /cluster/work/pausch/danang/pangenome_nonref/data/hybrid_assem/bovine_minigraph/nonref_ins/rna_seq/qc_reads
 
+# setting for wgs analysis
+dna_seq: True
+dna_basedir: /cluster/work/pausch/inputs/fastq/BTA
+dna_ref: 
+ - UCD
+ - OBV
+ - graph6
+dna_anims:
+ - RM724
+ - RM854
+ - RM806
+ - RM720
+ - BSWCHEF120075378834
+ - BSWCHEF120108462332

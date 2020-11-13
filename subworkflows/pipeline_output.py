@@ -74,3 +74,13 @@ def rna_analysis_output(include_rna_pipeline=True):
         rna_out.extend(expand("rna_seq/gene_model/{asb}_nonref_agustus_blastp.tsv", asb=graphcon))
 
     return rna_anims, rna_out
+
+
+def wgs_analysis_output(include_dna=config["dna_seq"]):
+
+    dna_out = []
+
+    if include_dna:
+        dna_out.append("wgs/stat/wgs_mapping_stat.tsv")
+
+    return dna_out

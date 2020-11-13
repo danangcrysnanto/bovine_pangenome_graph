@@ -23,12 +23,10 @@ include: "subworkflows/pipeline_output.py"
 core_out = core_analysis_output()
 sv_out = sv_analysis_output()
 rna_anims, rna_out = rna_analysis_output(include_rna_pipeline=config["rna_seq"])
+dna_out = wgs_analysis_output()
 
 rule all:
     input:
-        # core_out,
-        # sv_out,
-        # rna_out,
         expand("reports/{asb}_report.pdf", asb=graphcon)
 
 
@@ -136,12 +134,16 @@ if config["rna_seq"]:
     # Add workflow for functional analysis
     include: "subworkflows/rnaseq_analysis.py"
 
+# Add workflow for wgs analysis
+if config["dna_seq"]:
+    include: "subworkflows/wgs_analysis.py"
+
 rule generate_report:
     input:
-        # "graph/{asb}_graph.gfa"
         core_out,
         sv_out,
         rna_out,
+        dna_out
     output:
         "reports/{asb}_report.pdf"
     threads: 10
