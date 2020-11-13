@@ -8,5 +8,7 @@ gffinput: /path/to/gff
 # Setting for rna-seq analysis
 rna_seq: True
 reference: {ref}
-rna_basedir: /path/to/fastq_transcriptome
+# diamond protein db for blast 
+refprot: /ref/to/diamondprotdb
+rna_basedir: /ref/to/fastq_rna
 

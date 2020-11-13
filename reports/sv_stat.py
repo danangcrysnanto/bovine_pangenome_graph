@@ -57,17 +57,22 @@ def get_sv_annot_stat(assembly):
 
     """
 
-    annot_tally = defaultdict(int)
-
-    with open(f"analysis/bubble/{assembly}_bubble_annot.tsv") as infile:
-        for line in infile:
-            feature = line.strip().split()[1]
+    def tally_feature(features):
+        annot_tally = defaultdict(int)
+        for feature in features:
             if feature in ["mRNA", "gene"]:
                 annot_tally["intronic"] += 1
             else:
                 annot_tally[feature] += 1
-    annot_sv = "| Sequence Features | Count |\n"
-    annot_sv += "|------------------ | ----- |\n"
-    for key, value in annot_tally.items():
-        annot_sv += f"| {key} | {value:,}\n"
+        return annot_tally
+
+    infile = open(f"analysis/bubble/{assembly}_breakpoint_annot.tsv").readlines()
+    # b1_1_111515 1 111514 s1 s2 intergenic 1 1 111514 intergenic 1
+    left_features = tally_feature(features=[x.strip().split()[5] for x in infile[1:]])
+    right_features = tally_feature(features=[x.strip().split()[-2] for x in infile[1:]])
+    comb_features = {key: [left_features[key], right_features[key]] for key in left_features}
+    annot_sv = "| Sequence Features | Count left | Count right |\n"
+    annot_sv += "|------------------ | ----- | ---- | \n"
+    for key, values in comb_features.items():
+        annot_sv += f"| {key} | {values[0]:,}| {values[1]:,}|\n"
     return annot_sv

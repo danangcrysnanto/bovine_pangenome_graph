@@ -3,7 +3,7 @@
 Pipeline to integrate multiple assemblies into a graph representation.
 This pipeline wraps the functionality [Minigraph](https://github.com/lh3/minigraph) for genome graph construction. 
 We add the utility to labels nodes with the assemblies it derives, which crucial for many pangenome analyses. 
-Analyses which are common in pangenome analyses were also performed, which includes:    
+Analyses which are common in pangenome studies were also performed, which includes:    
 - Determination of core and flexible genome    
 - Analysis of non-reference sequences    
 - Extraction of the structural variations     
@@ -55,11 +55,9 @@ Set `rna_seq` to `True` in config to enable this analysis. You also need to prov
 
 - Structural variations derived from graphs.      
 These are large variations (fragment length > 100 bp) from bubbles in the graph that are
-not part of the reference sequences.  
-The SVs grouped by biallelic and multiallelic. 
-
-- Visualization of the bubbles (SVs) in the graphs. Selected bubbles visualized using `Graphviz` and stored in a combined `{graph}_{b|m}_viz.pdf` file.  
-Script [app.py](visualize/app.py) (`options -g {graphtype}`) can be run which will set up a local webserver (*not part of the pipeline*) to inspect SVs in a more detailed and in an interactive way. 
+not part of the reference sequences. The SVs grouped by biallelic and multiallelic.        
+Visualization of the bubbles (SVs) in the graphs. Bubbles crossing coding sequences visualized using `Graphviz`.       
+Script [app.py](vizualize/app.py) (`options -g {graphtype}`) can be run which will set up a local webserver (*not part of the pipeline*) to inspect SVs in a more detailed and in an interactive way. 
 
 - *Optional* if including the functional analysis: prediction of novel /non-reference genes with corresponding expression levels from transcriptome. 
 
