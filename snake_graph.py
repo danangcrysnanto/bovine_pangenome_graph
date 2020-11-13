@@ -23,14 +23,12 @@ include: "subworkflows/pipeline_output.py"
 core_out = core_analysis_output()
 sv_out = sv_analysis_output()
 rna_anims, rna_out = rna_analysis_output(include_rna_pipeline=config["rna_seq"])
-# rna_anims = rna_anims[:3]
-# rna_out = rna_out[:3]
 
 rule all:
     input:
-        core_out,
-        sv_out,
-        rna_out,
+        # core_out,
+        # sv_out,
+        # rna_out,
         expand("reports/{asb}_report.pdf", asb=graphcon)
 
 
@@ -49,7 +47,7 @@ rule construct_graph:
     threads: 10
     resources:
         mem_mb = 12000,
-        walltime = "01:00"
+        walltime = "02:00"
     shell:
         """
 
@@ -71,7 +69,7 @@ rule remap_graph:
     threads: 10
     resources:
         mem_mb = 5000,
-        walltime = "01:00"
+        walltime = "04:00"
     shell:
         """
          minigraph -t {threads} --cov -x asm {input[0]} {input[1]} > {output}
@@ -140,7 +138,10 @@ if config["rna_seq"]:
 
 rule generate_report:
     input:
-        "graph/{asb}_graph.gfa"
+        # "graph/{asb}_graph.gfa"
+        core_out,
+        sv_out,
+        rna_out,
     output:
         "reports/{asb}_report.pdf"
     threads: 10
