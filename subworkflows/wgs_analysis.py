@@ -49,8 +49,7 @@ rule map_genome:
         ref = "wgs/reference/{dnaref}.fa",
         refindex = rules.index_wgs.output
     output:
-        bam = "wgs/bam/{dna_anims}_{dnaref}.bam",
-        bai = "wgs/bam/{dna_anims}_{dnaref}.bam.bai"
+        bam = "wgs/bam/{dna_anims}_{dnaref}.bam"
     shadow: "full"
     threads: 10
     resources:
@@ -71,13 +70,27 @@ rule map_genome:
 
         bwa mem -t {threads} -R "@RG\\tID:anim1\\tPL:Illumina\\tLB:lib1\\tSM:{params.anims}" {input.ref} R1_qc.fq.gz R2_qc.fq.gz |
         samblaster|
-        samtools sort -@ {threads} -T $TMPDIR -O BAM -o {output[0]} -
+        samtools sort -@ {threads} -T $TMPDIR -O BAM -o {output} -
 
         """
+
+rule index_bam:
+    input: "wgs/bam/{dna_anims}_{dnaref}.bam"
+    output: "wgs/bam/{dna_anims}_{dnaref}.bam.bai"
+    threads: 10
+    resources:
+        mem_mb = 2000,
+        walltime = "04:00"
+    shell:
+        """
+        samtools index –@ {threads} {input} {output}
+
+        """
+
 rule stat_mapping:
     input:
-        bam = rules.map_genome.output[0],
-        bai = rules.map_genome.output[1]
+        bam = rules.map_genome.output,
+        bai = rules.index_bam.output
     output:
         "wgs/stat/{dnaref}/{dna_anims}_{dnaref}_stat.tsv"
     threads: 10
