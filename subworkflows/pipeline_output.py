@@ -12,6 +12,8 @@ def core_analysis_output():
     core_out.extend(expand("analysis/colour_node/{asb}_nodecol.tsv", asb=graphcon))
     core_out.extend(expand("analysis/colour_node/{asb}_nodemat.tsv", asb=graphcon))
     core_out.extend(expand("analysis/core_nonref/{asb}_core_analysis.tsv", asb=graphcon))
+    # phylogenetic tree across assemblies
+    core_out.extend(["tree/assembly_phylo_tree.pdf"])
 
     return core_out
 

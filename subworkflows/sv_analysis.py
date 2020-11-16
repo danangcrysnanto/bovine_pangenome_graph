@@ -133,10 +133,6 @@ rule create_breakpoint_bed:
     output:
         left_bed = "analysis/bubble/{asb}_left_breakpoints.bed",
         right_bed = "analysis/bubble/{asb}_right_breakpoints.bed"
-    threads: 10
-    resources:
-        mem_mb = 1000,
-        walltime = "00:10"
     run:
         # get right breakpoint
         right_bp = {}
