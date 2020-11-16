@@ -65,6 +65,9 @@ def graph_stat_report(assembly, assemb_comp):
     for ind, [key, values] in enumerate(all_nodes.items()):
         if key != 0:
             report_string += f"|Added from {assemb_comp[ind]}|{int(values[0]):,} | {int(values[1]):,}| \n"
+    # Add total number of edges
+    total_edges = sum(edge_classifier(combgraph).values())
+    report_string += f"|Total Edges| {total_edges} | ratio: {total_edges/len(combgraph.nodes):.4f}|\n"
     # Add edge types
     for key, value in edge_classifier(combgraph).items():
         report_string += f"|Edge {key}|{value:,}|0| \n"

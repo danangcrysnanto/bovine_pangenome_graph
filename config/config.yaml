@@ -1,4 +1,4 @@
-workdir: compare_assembly
+workdir: final_graph
 
 # Setting for SV analysis
 # gff always relative to the workdir
@@ -12,3 +12,16 @@ reference: {ref}
 refprot: /ref/to/diamondprotdb
 rna_basedir: /ref/to/fastq_rna
 
+# setting for wgs analysis
+dna_seq: True
+dna_basedir: /cluster/work/pausch/inputs/fastq/BTA
+dna_ref: 
+ - UCD
+ - OBV
+ - graph6
+dna_anims:
+ - RM724
+ - RM806
+ - RM720
+ - BSWCHEF120075378834
+ - BSWCHEF120108462332

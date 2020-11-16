@@ -12,6 +12,8 @@ def core_analysis_output():
     core_out.extend(expand("analysis/colour_node/{asb}_nodecol.tsv", asb=graphcon))
     core_out.extend(expand("analysis/colour_node/{asb}_nodemat.tsv", asb=graphcon))
     core_out.extend(expand("analysis/core_nonref/{asb}_core_analysis.tsv", asb=graphcon))
+    # phylogenetic tree across assemblies
+    core_out.extend(["tree/assembly_phylo_tree.pdf"])
 
     return core_out
 
@@ -74,3 +76,13 @@ def rna_analysis_output(include_rna_pipeline=True):
         rna_out.extend(expand("rna_seq/gene_model/{asb}_nonref_agustus_blastp.tsv", asb=graphcon))
 
     return rna_anims, rna_out
+
+
+def wgs_analysis_output(include_dna=config["dna_seq"]):
+
+    dna_out = []
+
+    if include_dna:
+        dna_out.append("wgs/stat/wgs_mapping_stat.tsv")
+
+    return dna_out
