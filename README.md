@@ -9,7 +9,7 @@ Analyses which are common in pangenome studies were also performed, which includ
 - Extraction of the structural variations     
 - Novel genes predictions and corresponding expression level.        
 
-See [Here](subworkflows/pipeline_scheme.pdf) for the scheme of the pipeline and [Here](reports/taurus_report.pdf) for example of the generated report. 
+See [Here](pipeline_scheme.pdf) for the scheme of the pipeline and [Here](reports/taurus_report.pdf) for example of the generated report. 
 
 Developed for analysis of bovine genomes, but should be applicable to the other species as well.      
 
@@ -57,7 +57,7 @@ Set `rna_seq` to `True` in config to enable this analysis. You also need to prov
 These are large variations (fragment length > 100 bp) from bubbles in the graph that are
 not part of the reference sequences. The SVs grouped by biallelic and multiallelic.        
 Visualization of the bubbles (SVs) in the graphs. Bubbles crossing coding sequences visualized using `Graphviz`.       
-Script [app.py](vizualize/app.py) (`options -g {graphtype}`) can be run which will set up a local webserver (*not part of the pipeline*) to inspect SVs in a more detailed and in an interactive way. 
+Script [app.py](visualize/app.py) (`options -g {graphtype}`) can be run which will set up a local webserver (*not part of the pipeline*) to inspect SVs in a more detailed and in an interactive way. 
 
 - *Optional* if including the functional analysis: prediction of novel /non-reference genes with corresponding expression levels from transcriptome. 
 
