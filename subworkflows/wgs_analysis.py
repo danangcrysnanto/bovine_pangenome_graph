@@ -9,7 +9,7 @@ def get_dna_ref(combref=config["dna_ref"]):
         if ref in graphcon:
             refmap[f"{ref}pan"] = f"rna_seq/reference/{config['reference']}+{ref}.fa"
         else:
-            refmap[f"{ref}lin"] = f"assembly/{ref}.fa"
+            refmap[f"{ref}lin"] = f"assembly/{ref}_full.fa"
     return refmap
 
 
@@ -83,7 +83,8 @@ rule index_bam:
         walltime = "04:00"
     shell:
         """
-        samtools index –@ {threads} {input} {output}
+
+        samtools index -@ {threads} {input} 
 
         """
 
@@ -103,7 +104,7 @@ rule stat_mapping:
     shell:
         """
 
-        {workflow.basedir}/collect_bam_stat.py -a {params.anims} -m {params.assemb} > {output}
+        {workflow.basedir}/scripts/collect_bam_stat.py -a {params.anims} -m {params.assemb} > {output}
 
         """
 
