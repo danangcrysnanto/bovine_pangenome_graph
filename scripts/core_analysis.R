@@ -26,15 +26,22 @@ calculate_core <- function(nodemat, graphlen, graphtype, outbase = ".") {
     # join to get the node len in the matrix
     datmat <- datmat %>% left_join(datlen, by = c("nodeid"))
 
-    # calculate core genome
+    # calculate core genome length 
     core <- sum(datmat[datmat$combres == totassemb, "conlen"])
     flexible <- sum(datmat[datmat$combres < totassemb, "conlen"])
     flexible_shared <- sum(datmat[datmat$combres < totassemb & datmat$combres > 1, "conlen"])
     private <- sum(datmat[datmat$combres == 1, "conlen"])
 
+    # add core and flexible node count 
+    node_core <- length(datmat[datmat$combres == totassemb, "conlen"])
+    node_flexible <- length(datmat[datmat$combres < totassemb, "conlen"])
+    node_flexible_shared <- length(datmat[datmat$combres < totassemb & datmat$combres > 1, "conlen"])
+    node_private <- length(datmat[datmat$combres == 1, "conlen"])
+
     outfile <- file.path(outbase, paste0(graphtype, "_core_analysis.tsv"))
     cat("core", "flexible", "flexible_shared", "private", "\n", file = outfile, append = TRUE)
-    cat(core, flexible, flexible_shared, private, file = outfile, append = TRUE)
+    cat(core, flexible, flexible_shared, private, "\n", file = outfile, append = TRUE)
+    cat(node_core, node_flexible, node_flexible_shared, node_private, file = outfile, append = TRUE)
 }
 
 

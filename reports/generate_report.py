@@ -54,11 +54,11 @@ def resources_stat(assembly):
 
 def core_genome_stat(assembly):
     core_string = "### *Core - flexible genome analysis*\n\n\n"
-    core_string += "| Pangenome component | Length|Proportion|\n"
-    core_string += "| ------------------- | ------|----------|\n"
+    core_string += "| Pangenome component | Node count | Length |Proportion|\n"
+    core_string += "| ------------------- | -----------| ------ |----------|\n"
     core_comp = [x.strip().split() for x in open(f"analysis/core_nonref/{assembly}_core_analysis.tsv").readlines()]
-    for param, val in zip(*core_comp):
-        core_string += f"| {param} | {int(val):,} | {int(val) *100 / sum( [int(x) for x in core_comp[1][:2]] ):.2f}%\n"
+    for param, val, nodecount in zip(*core_comp):
+        core_string += f"| {param} | {int(nodecount):,} | {int(val):,} | {int(val) *100 / sum( [int(x) for x in core_comp[1][:2]] ):.2f}%\n"
     core_string += "\n\n"
     core_string += f"![Pangenome size as sample increased](analysis/core_nonref/{assembly}_core_flex_sim.png)\n\n\n"
     return core_string
