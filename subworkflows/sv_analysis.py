@@ -134,17 +134,23 @@ rule create_breakpoint_bed:
         left_bed = "analysis/bubble/{asb}_left_breakpoints.bed",
         right_bed = "analysis/bubble/{asb}_right_breakpoints.bed"
     run:
+        import re
+
         # get right breakpoint
         right_bp = {}
         with open(input["bubble_file"]) as infile:
             for line in infile:
                 chromo, left_side, right_side, *_ = line.strip().split()
+                # only get the numeric part of the chromo
+                chromo = [int(x) for x in chromo.split("_") if re.search(r"\d+", x)][0]
                 right_bp[f"{chromo}_{left_side}"] = right_side
         # process the biallelic breakpoints
 
         def wrote_sv_bed(line, left_file, right_file):
             sv_comp, *sv_rest = line.strip().split()
-            _, chromo, leftcoord = sv_comp.split("_")
+            _, *chromo, leftcoord = sv_comp.split("_")
+            # only get the numeric part as the chromosome id
+            chromo = [int(x) for x in chromo if re.search(r"\d+", x)][0]
             leftcoord = int(leftcoord)
             start_node, *_, stop_node = sv_rest[-2].split(",")
             left_file.write(
@@ -163,7 +169,9 @@ rule create_breakpoint_bed:
                 mutlist = []
                 for line in multifile:
                     sv_comp, *sv_rest = line.strip().split()
-                    _, chromo, leftcoord = sv_comp.split("_")
+                    _, *chromo, leftcoord = sv_comp.split("_")
+                    # only get the numeric part as the chromosome id
+                    chromo = [int(x) for x in chromo if re.search(r"\d+", x)][0]
                     svid = f"{chromo}_{leftcoord}"
                     if svid not in sv_processed:
                         sv_processed.append(svid)
