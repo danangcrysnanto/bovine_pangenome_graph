@@ -20,22 +20,23 @@ def main():
     merger = PdfFileMerger(strict=False)
 
     # determine mutation types
-    # b1_1_111515     Insertion       314     s1,s122888,s2   +,+,+
-    # m1_1_575817     AltIns  640     s70,s151801,s72 +,+,+
 
-    def get_sv(svfile):
+    def get_sv(svfile, svtype="biallelic"):
         all_sv = defaultdict(list)
         with open(svfile) as file_:
             for line in file_:
-                svid, mutype, *_ = line.strip().split()
+                if svtype == "biallelic":
+                    # svid, mutype, *_ = line.strip().split()
+                    chromo, leftcoord, mutype, *_ = line.strip().split()
+                    svid = f"{chromo}_{leftcoord}"
+                if svtype == "multiallelic":
+                    # 1_535561        1898    5138    AltIns  s35,s123493,s38
+                    svid, startpos, stoppos, mutype, _ = line.strip().split()
                 all_sv[svid].append(mutype)
         return all_sv
 
-    all_sv = {**get_sv(snakemake.input["bialsv_file"]), **get_sv(snakemake.input["multisv_file"])}
-
-    # bialsv_file = "analysis/bubble/{asb}_bialsv_stat.tsv",
-    # multisv_file = "analysis/bubble/{asb}_multisv_stat.tsv"
-    # annot_file = "analysis/bubble/{asb}_breakpoint_annot.tsv"
+    all_sv = {**get_sv(snakemake.input["bialsv_file"]), **
+              get_sv(snakemake.input["multisv_file"], svtype="multiallelic")}
 
     # b1_1_111515 1 111514 s1 s2 intergenic 1 1 111514 intergenic 1
     for line in lines[1:]:

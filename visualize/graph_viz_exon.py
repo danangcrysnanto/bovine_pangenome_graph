@@ -147,7 +147,7 @@ def main():
     graph = generate_edges(graphtype)
     nodeinf = graph_info(graphtype)
 
-    visualize_graph(graphtype, graphcomp, graph, nodeinf, start, stop)
+    visualize_graph(graphtype, graphcomp, graph, nodeinf, start, stop, annot)
 
 
 if __name__ == "__main__":
