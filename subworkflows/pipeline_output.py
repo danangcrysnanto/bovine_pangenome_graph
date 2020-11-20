@@ -31,6 +31,9 @@ def sv_analysis_output():
     sv_out.extend(expand("analysis/bubble/{asb}_{svtype}_sv_viz.pdf", asb=graphcon, svtype=svlist))
     sv_out.extend(expand("analysis/bubble/{asb}_exon_viz.pdf", asb=graphcon))
 
+    # trace paths in the bubbles
+    sv_out.extend(expand("analysis/bubble/{asb}_path_trace.tsv", asb=graphcon))
+
     return sv_out
 
 

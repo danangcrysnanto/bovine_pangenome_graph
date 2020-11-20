@@ -89,6 +89,26 @@ rule extract_multisv:
             {workflow.basedir}/scripts/get_multiseq.py -a {wildcards.asb}
         """
 
+rule trace_paths:
+    input:
+        "remap/{asb}_edge_use.tsv",
+        "analysis/bubble/{asb}_biallelic_sv.tsv",
+        "analysis/bubble/{asb}_multiallelic_sv.tsv"
+    output:
+        "analysis/bubble/{asb}_path_trace.tsv"
+    threads: 10
+    resources:
+        mem_mb = 1000,
+        walltime = "01:00"
+    params:
+        assemb = lambda wildcards: get_assemb(wildcards.asb)
+    shell:
+        """
+
+        {workflow.basedir}/scripts/trace_path.py -g {wildcards.asb} -a {params.assemb} > {output}
+
+        """
+
 rule visualize_sv:
     input:
         rules.collect_biallelic_sv.output,
