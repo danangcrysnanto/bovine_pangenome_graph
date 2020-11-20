@@ -35,7 +35,7 @@ rule blastx_nonref:
 
         sort -k1,1 -k11,11nr -k12,12n  {output}.temp |
         sort -u -k1,1 --merge |
-        awk '$4/$14>=0.7 && $3>=70' > {output} && rm {output}.temp
+        awk '$4/$14>=0.7 && $3>=80' > {output} && rm {output}.temp
 
         """
 
@@ -213,7 +213,7 @@ rule blastp_nonref:
 
         sort -k1,1 -k11,11nr -k12,12n  {output}.temp |
         sort -u -k1,1 --merge |
-        awk '$4/$13>=0.7 && $3>=70' > {output} && rm {output}.temp
+        awk '$4/$14>=0.7 && $3>=70' > {output}
 
         """
 

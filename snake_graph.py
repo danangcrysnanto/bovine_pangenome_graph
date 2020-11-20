@@ -78,7 +78,8 @@ rule comb_coverage:
     input:
         lambda wildcards: [f"remap/{wildcards.asb}/{x}_{wildcards.asb}.gaf" for x in get_assemb(wildcards.asb)]
     output:
-        "remap/{asb}_coverage.tsv"
+        "remap/{asb}_coverage.tsv",
+        "remap/{asb}_edge_use.tsv"
     params:
         anims = lambda wildcards: get_assemb(wildcards.asb)
     threads: 5
@@ -95,7 +96,7 @@ rule comb_coverage:
 rule colour_node:
     input:
         rules.construct_graph.output[1],
-        rules.comb_coverage.output
+        ancient(rules.comb_coverage.output[0])
     output:
         "analysis/colour_node/{asb}_nodecol.tsv",
         "analysis/colour_node/{asb}_nodemat.tsv"
