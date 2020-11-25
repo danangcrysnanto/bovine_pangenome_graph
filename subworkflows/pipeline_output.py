@@ -34,6 +34,9 @@ def sv_analysis_output():
     # trace paths in the bubbles
     sv_out.extend(expand("analysis/bubble/{asb}_path_trace.tsv", asb=graphcon))
 
+    # full extended reference
+    sv_out.extend(expand(f"extended_ref/{config['reference']}+{{asb}}.fa", asb=graphcon))
+
     return sv_out
 
 
