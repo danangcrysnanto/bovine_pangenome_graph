@@ -2,12 +2,13 @@
 
 from graph_obj import Edge, Node, Graph
 from collections import defaultdict
+import argparse
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("-g", "-graph", help="graphfile")
+    parser.add_argument("-g", "--graph", help="graphfile")
     parser.add_argument("-a", "--alignment", help="alignment file")
     # output as list with first as node coverage file and second as the edge coverage file
     parser.add_argument("-o", "--outfile", help="output file", nargs="+")
@@ -32,7 +33,7 @@ def parse_graph(graphfile):
     return nodecov, edgecov
 
 
-def node_edge_updater(pathcomp):
+def coverage_updater(pathcomp):
     """
 
     Update node and edge coverage from reads
@@ -48,24 +49,24 @@ def node_edge_updater(pathcomp):
             nodecov[comp] += 1
             added_node.append(comp)
 
-        # if more than one nodes also calculate edge coverage
-        # stop when at the end nodes
-        if ind + 1 != len(pathcomp):
-            parent = comp
-            child = pathcomp[ind + 1]
-            edge_id = f"{parent}_{child}"
-            # only added edge never seen before in the same read
+            # if more than one nodes also calculate edge coverage
+            # stop when at the end nodes
+            if ind + 1 != len(pathcomp):
+                parent = comp
+                child = pathcomp[ind + 1]
+                edge_id = f"{parent}_{child}"
+                # only added edge never seen before in the same read
 
-            if edge_id not in added_edge:
-                added_edge.append(edge_id)
-                try:
-                    edgecov[parent][child] += 1
-                except:
+                if edge_id not in added_edge:
+                    added_edge.append(edge_id)
                     try:
-                        edgecov[child][parent] += 1
-                    # only added edge which present in the initial graph
+                        edgecov[parent][child] += 1
                     except:
-                        continue
+                        try:
+                            edgecov[child][parent] += 1
+                        # only added edge which present in the initial graph
+                        except:
+                            continue
 
 
 if __name__ == "__main__":
@@ -92,7 +93,7 @@ if __name__ == "__main__":
             pathcomp = pathcomp[1:]
 
             if readnow == readprev:
-                node_edge_updater(pathcomp)
+                coverage_updater(pathcomp)
 
             else:
                 # reset
@@ -100,7 +101,7 @@ if __name__ == "__main__":
                 added_edge = []
                 # process the line
 
-                node_edge_updater(pathcomp)
+                coverage_updater(pathcomp)
 
         # reset read name
             readprev = readnow
