@@ -7,7 +7,7 @@ def get_dna_ref(combref=config["dna_ref"]):
     refmap = {}
     for ref in combref:
         if ref in graphcon:
-            refmap[f"{ref}pan"] = f"rna_seq/reference/{config['reference']}+{ref}.fa"
+            refmap[f"{ref}pan"] = f"extended_ref/{config['reference']}+{ref}.fa"
         else:
             refmap[f"{ref}lin"] = f"assembly/{ref}_full.fa"
     return refmap

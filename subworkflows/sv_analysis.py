@@ -144,6 +144,18 @@ rule combine_sv:
             cat {input} > {output}
         """
 
+localrules: create_full_ref
+rule create_full_ref:
+    input:
+        genome = f"assembly/{config['reference']}_full.fa",
+        sv = "analysis/bubble/{asb}_nonrefsv.fa"
+    output: f"extended_ref/{config['reference']}+{{asb}}.fa"
+    shell:
+        """
+
+        cat {input.genome} {input.sv} > {output}
+
+        """
 localrules: create_breakpoint_bed
 rule create_breakpoint_bed:
     input:
