@@ -7,7 +7,7 @@ configfile: "config/config_hifi.yaml"
 workdir: config["workdir"]
 
 hifi_base = config["hifi_base"]
-hifi_list = [x.split("/")[-1].split(".")[0] for x in glob.glob(hifi_base + "/*.fasta.gz")]
+hifi_list = [x.split("/")[-1].split(".")[0] for x in glob.glob(hifi_base + "/*.fastq.gz")]
 split_size = config["split_size"]
 graph_list = config["graph_list"]
 
@@ -18,7 +18,7 @@ rule all:
 
 checkpoint split_fasta:
     input:
-        hifi_base + "/{hifi_anims}.fasta.gz"
+        hifi_base + "/{hifi_anims}.fastq.gz"
     output:
         directory("validation/hifi_reads/split_{hifi_anims}")
     threads: 10
@@ -37,7 +37,7 @@ checkpoint split_fasta:
 
 rule map_hifi:
     input:
-        fasta = "validation/hifi_reads/split_{hifi_anims}/{hifi_anims}.part_{part}.fasta.gz",
+        fasta = "validation/hifi_reads/split_{hifi_anims}/{hifi_anims}.part_{part}.fastq.gz",
         graph = "graph/{graph}_graph.gfa"
     output:
         "validation/aligned/{hifi_anims}_{graph}/{hifi_anims}_{graph}_{part}.gaf"
@@ -89,7 +89,7 @@ def get_part(wildcards):
     selgraph = wildcards.graph
 
     checkpoint_output = checkpoints.split_fasta.get(**wildcards).output[0]
-    all_parts, = glob_wildcards(checkpoint_output + f"/{selanim}.part_{{part}}.fasta.gz")
+    all_parts, = glob_wildcards(checkpoint_output + f"/{selanim}.part_{{part}}.fastq.gz")
     return [[f"validation/coverage/{selanim}_{selgraph}/{selanim}_{selgraph}_{part}_nodecov.tsv" for part in all_parts],
             [f"validation/coverage/{selanim}_{selgraph}/{selanim}_{selgraph}_{part}_edgecov.tsv" for part in all_parts]]
 
