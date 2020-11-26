@@ -111,6 +111,7 @@ rule colour_node:
             {workflow.basedir}/scripts/colour_node.R {wildcards.asb} {params.assemb}
         """
 
+localrules: identify_core_nonref
 rule identify_core_nonref:
     input:
         rules.construct_graph.output[1],

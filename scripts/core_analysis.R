@@ -93,7 +93,11 @@ pangenome_sampling <- function(graphlen, nodemat, graphtype, outbase = ".") {
             # core if shared in all of the member of population
             core_gen <- selcol[selcol$comcol == nosamp, "conlen"] %>% sum()
             # flex genome if shared less than the total of population
-            flex_gen <- selcol[selcol$comcol < nosamp, "conlen"] %>% sum()
+	    # not consider node not present 
+	    if (nosamp == 1) 
+		    flex_gen  <- 0 
+	    else 
+		    flex_gen <- selcol[selcol$comcol < nosamp & selcol$comcol > 0, "conlen"] %>% sum()
             # tot_genome if at least observed in a single breeds
             tot_gen <- selcol[selcol$comcol > 0, "conlen"] %>% sum()
             datpan <- rbind(datpan, data.frame(
