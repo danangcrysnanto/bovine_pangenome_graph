@@ -1,0 +1,17 @@
+# config for variant calling
+
+workdir: final_graph
+
+
+# directory of bam files
+# noted that the bam named as $anim.bam
+bamdir: "/cluster/work/pausch/danang/pangenome_nonref/data/hybrid_assem/assembly/graph_pipe/final_graph/wgs/bam"
+
+# from which graph the variants called
+graph: "graph6"
+
+# reference
+# ref: wgs/reference/graph6pan.fa
+
+# known variant database
+knowvar: "/cluster/work/pausch/inputs/ref/BTA/UCD1.2/ARS1.2PlusY_BQSR.vcf.gz"
