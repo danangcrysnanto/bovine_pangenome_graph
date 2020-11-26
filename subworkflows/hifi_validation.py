@@ -14,7 +14,8 @@ graph_list = config["graph_list"]
 rule all:
     input:
         expand("validation/coverage/{hifi_anim}_{graph}_node_coverage.tsv", hifi_anim=hifi_list, graph=graph_list),
-        expand("validation/coverage/{hifi_anim}_{graph}_edge_coverage.tsv", hifi_anim=hifi_list, graph=graph_list)
+        expand("validation/coverage/{hifi_anim}_{graph}_edge_coverage.tsv", hifi_anim=hifi_list, graph=graph_list),
+        expand("validation/coverage/{hifi_anim}_{graph}_bubble_support.tsv", hifi_anim=hifi_list, graph=graph_list)
 
 checkpoint split_fasta:
     input:
@@ -71,11 +72,13 @@ rule calculate_coverage:
     threads: 10
     resources:
         mem_mb = 1000,
-        walltime = "04:00"
+        walltime = "01:00"
+    params:
+        parentdir = parentdir
     shell:
         """
 
-        {workflow.basedir}/calculate_coverage_hifi.py -g {input.graph} -a {input.alignment} -o {output}
+        {params.parentdir}/scripts/calculate_coverage_hifi.py -g {input.graph} -a {input.alignment} -o {output}
 
         """
 
@@ -131,3 +134,46 @@ rule combined_edge_hifi:
         {params.parentdir}/scripts/combine_hifi_coverage.py -g {input.graph} -c {input.node_list} -o {output}
 
         """
+
+localrules: calculate_bubble_support
+rule calculate_bubble_support:
+    input:
+        "analysis/bubble/{graph}_path_trace.tsv",
+        "validation/coverage/{hifi_anims}_{graph}_edge_coverage.tsv"
+    output: "validation/coverage/{hifi_anims}_{graph}_bubble_support.tsv"
+    run:
+        from collections import defaultdict
+
+        def parse_edge_file(edgefile):
+            combedge = defaultdict(dict)
+            with open(edgefile) as infile:
+                for line in infile:
+                    parent, child, coverage = line.strip().split()
+                    combedge[parent][child] = coverage
+            return combedge
+
+        def extract_coverage(combedge, paths):
+            coverage = 0
+            for ind, node in enumerate(paths[:-1]):
+                parent = node
+                child = paths[ind + 1]
+                nodecover = int(combedge[parent][child])
+                coverage = min([coverage, nodecover])
+            return nodecover
+
+        svfile = input[0]
+        edgefile = input[1]
+        combedge = parse_edge_file(edgefile)
+
+        with open(svfile) as infile, open(output[0], "a") as outfile:
+
+            for line in infile:
+                # biallelic        1_165873        AltDel          497     2       s1,s2,s3        UCD,OBV         s1,s133016,s3   Angus,OBV
+                linecomp = line.strip().split()
+                sv_comp = linecomp[:3]
+                ref_path = linecomp[5].split(",")
+                nonref_path = linecomp[-2].split(",")
+                ref_cover = extract_coverage(combedge, paths=ref_path)
+                nonref_cover = extract_coverage(combedge, paths=nonref_path)
+
+                print(*sv_comp, linecomp[5], linecomp[-2], ref_cover, nonref_cover, file=outfile)
