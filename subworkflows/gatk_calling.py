@@ -22,17 +22,14 @@ rule create_nonref_bed:
     run:
 
         def create_nonref_bed(infile):
-            all_nonref = []
             for line in infile:
                 if line.startswith(">"):
-                    linecomp = line.strip().split()[1:]
-                    all_nonref.append(linecomp)
-            return all_nonref
+                    linecomp = line.strip()[1:]
+                    yield linecomp
 
-        all_nonref = create_nonref_bed(input[0])
-        for comp in all_nonref:
-            with open(output[0], "a") as outfile:
-                outfile.write(comp)
+        with open(input[0]) as infile, open(output[0], "a") as outfile:
+            for comp in create_nonref_bed(infile):
+                outfile.write(f"{comp}\n")
 
 
 # Recalibration
