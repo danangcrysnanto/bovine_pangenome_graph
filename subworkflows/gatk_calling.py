@@ -32,6 +32,34 @@ rule create_nonref_bed:
                 outfile.write(f"{comp}\n")
 
 
+rule create_fasta_index:
+    input: "wgs/reference/{graph}pan.fa"
+    output: "wgs/reference/{graph}pan.fa.fai"
+    threads: 10
+    resources:
+        mem_mb = 2000,
+        walltime = "01:00"
+    shell:
+        """
+         samtools faidx {input}
+        """
+
+
+rule create_fasta_dict:
+    input: "wgs/reference/{graph}pan.fa"
+    output: "wgs/reference/{graph}pan.dict"
+    threads: 10
+    resources:
+        mem_mb = 2000,
+        walltime = "01:00"
+    envmodules:
+        "gcc/4.8.5",
+        "jdk/8u172-b11"
+    shell:
+        """
+         gatk CreateSequenceDictionary -R {input}
+        """
+
 # Recalibration
 # chromosome 1 to 29 for recalibration
 chromo = " ".join([f"-L {i}" for i in range(1, 30)])
@@ -39,7 +67,9 @@ chromo = " ".join([f"-L {i}" for i in range(1, 30)])
 rule recalibrator_creator:
     input:
         bam = BAMDIR + "/{sample}_{graph}pan.bam",
-        ref = "wgs/reference/{graph}pan.fa"
+        ref = "wgs/reference/{graph}pan.fa",
+        fai = "wgs/reference/{graph}pan.fa.fai",
+        sdict = "wgs/reference/{graph}pan.dict"
     output:
         "wgs/varcall/{sample}_{graph}_recalibrator.table"
     threads: 10
@@ -56,7 +86,7 @@ rule recalibrator_creator:
         """
 
         gatk BaseRecalibrator \
-            -I {input} \
+            -I {input.bam} \
             {params.chromo} \
             -R {input.ref} \
             --known-sites {params.db} \

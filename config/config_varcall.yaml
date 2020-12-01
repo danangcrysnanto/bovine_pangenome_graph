@@ -1,14 +1,14 @@
 # config for variant calling
 
-workdir: final_graph
+workdir: graph_trial
 
 
 # directory of bam files
 # noted that the bam named as $anim.bam
-bamdir: "/cluster/work/pausch/danang/pangenome_nonref/data/hybrid_assem/assembly/graph_pipe/final_graph/wgs/bam"
+bamdir: "/cluster/work/pausch/danang/pangenome_nonref/data/hybrid_assem/assembly/graph_pipe/graph_trial/wgs/bam"
 
 # from which graph the variants called
-graph: "graph6"
+graph: "graphord"
 
 # reference
 # ref: wgs/reference/graph6pan.fa
