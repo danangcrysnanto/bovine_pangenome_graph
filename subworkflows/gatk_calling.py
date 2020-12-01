@@ -170,7 +170,7 @@ rule GenomicsDB_import:
         tr " " "\\n"|
         awk '{{ split($1,arr,"/");
               split(arr[3],samp, "_"); 
-              print $1"\\t"samp[1] }}' > {output.samp_map}
+              print samp[1]"\\t"$1 }}' > {output.samp_map}
 
         gatk GenomicsDBImport \
             --sample-name-map {output.samp_map} \
