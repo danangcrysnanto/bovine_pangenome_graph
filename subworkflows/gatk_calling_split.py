@@ -94,7 +94,6 @@ rule recalibrator_creator:
 
         """
 
-
 rule base_recalibrator:
     input:
         recal = rules.recalibrator_creator.output,
@@ -148,58 +147,38 @@ rule Haplotype_caller:
 
         """
 
-# rule GenomicsDB_import:
-    # input:
-        # gvcf = expand("wgs/gvcf/{sample}_{{graph}}.g.vcf.gz", sample=SAMPLES),
-        # ref = "wgs/reference/{graph}pan.fa",
-        # nonref_file = "wgs/varcall/{graph}_nonref.list"
-    # output:
-        # samp_map = "wgs/varcall/db_imp/nonref_{graph}.map",
-        # db_dir = directory(temp("wgs/varcall/db_imp/db_nonref_{graph}"))
-    # threads: 10
-    # resources:
-        # mem_mb = 5000,
-        # walltime = "04:00"
-    # envmodules:
-        # "gcc/4.8.5",
-        # "jdk/8u172-b11"
-    # shell:
-        # """
+localrules: split_bed
+checkpoint split_bed:
+    input: "wgs/varcall/{graph}_nonref.list"
+    output: directory("wgs/split_bed_{graph}")
+    params:
+        split_size = 100
+    shell:
+        """
 
-        # echo {input.gvcf} |
-        # tr " " "\\n"|
-        # awk '{{ split($1,arr,"/");
-        # split(arr[3],samp, "_");
-        # print samp[1]"\\t"$1 }}' > {output.samp_map}
+        mkdir -p {output}
 
-        # gatk GenomicsDBImport \
-        # --sample-name-map {output.samp_map} \
-        # --genomicsdb-workspace-path {output.db_dir} \
-        # --batch-size 45 \
-        # --reader-threads 10 \
-        # -L {input.nonref_file} \
-        # -R {input.ref}
+        split -d -a 3 -l {params.split_size} {input} {output}/part
 
-        # """
+        """
 
-rule Combine_gvcfs:
+
+rule call_vcf:
     input:
         gvcf = expand("wgs/gvcf/{sample}_{{graph}}.g.vcf.gz", sample=SAMPLES),
         ref = "wgs/reference/{graph}pan.fa",
         ref_dict = "wgs/reference/{graph}pan.dict",
-        nonref_file = "wgs/varcall/{graph}_nonref.list"
+        nonref_file = "wgs/split_bed_{graph}/part{part}"
     output:
-        combgv = "wgs/comb/{graph}.g.vcf.gz"
+        protected("wgs/varcall/vcf/nonref_{graph}_{part}.vcf.gz")
     threads: 10
     resources:
         mem_mb = 5000,
         walltime = "04:00",
-        disk_scracth = 100
+        disk_scratch = 50
     envmodules:
         "gcc/4.8.5",
         "jdk/8u172-b11"
-    params:
-        sample_inf = " ".join([f"--variant {samp}_{{graph}}.g.vcf.gz" for samp in SAMPLES])
     shell:
         """
 
@@ -211,37 +190,57 @@ rule Combine_gvcfs:
 
         cd $TMPDIR
 
-        gatk CombineGVCFs \
-         -R {wildcards.graph}pan.fa \
-         {params.sample_inf} \
-         -L {wildcards.graph}_nonref.list \
-         -O comb_out.g.vcf.gz
+        mv part{wildcards.part} part{wildcards.part}.list
 
-         cp comb_out.g.vcf.gz $LS_SUBCWD/{output}
+        echo {input.gvcf} |
+        tr " " "\\n"|
+        awk '{{ split($1,arr,"/");
+        split(arr[3],samp, "_");
+        print samp[1]"\\t"arr[3] }}' > out.samp
+
+        gatk GenomicsDBImport \
+            --sample-name-map out.samp \
+            --genomicsdb-workspace-path db_comb \
+            --reader-threads 8 \
+            -L part{wildcards.part}.list \
+            -R {wildcards.graph}pan.fa
+
+
+        gatk GenotypeGVCFs \
+            -R {wildcards.graph}pan.fa \
+            -L part{wildcards.part}.list \
+            -O out.vcf \
+            -V gendb://db_comb
+
+        cp out.vcf $LS_SUBCWD/{output}
 
         """
 
-rule Joint_Genotyping:
-    input:
-        combgv = "wgs/comb/{graph}.g.vcf.gz",
-        ref = "wgs/reference/{graph}pan.fa",
-        nonref_file = "wgs/varcall/{graph}_nonref.list"
-    output:
-        protected("wgs/varcall/vcf/nonref_{graph}.vcf.gz")
+
+def get_part(wildcards):
+    """
+
+    Return splitted part region of bed
+
+    """
+
+    checkpoint_output = checkpoints.split_bed.get(**wildcards).output[0]
+    all_parts, = glob_wildcards(checkpoint_output + "/part{part}")
+    print(all_parts)
+
+    return (f"wgs/varcall/vcf/nonref_{wildcards.graph}_{part}.vcf.gz" for part in all_parts)
+
+
+rule combine_vcf:
+    input: get_part
+    output: "wgs/varcall/vcf/nonref_{graph}.vcf.gz"
     threads: 10
     resources:
-        mem_mb = 5000,
-        walltime = "12:00"
-    envmodules:
-        "gcc/4.8.5",
-        "jdk/8u172-b11"
+        mem_mb = 1000,
+        walltime = "01:00"
     shell:
         """
 
-        gatk GenotypeGVCFs \
-            -R {input.ref} \
-            -L {input.nonref_file} \
-            -O {output} \
-            -V {input}
+        echo {input} > {output}
 
         """
