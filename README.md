@@ -7,7 +7,8 @@ Analyses which are common in pangenome studies were also performed, which includ
 - Determination of core and flexible genome    
 - Analysis of non-reference sequences    
 - Extraction of the structural variations     
-- Novel genes predictions and corresponding expression level.        
+- Novel genes predictions and corresponding expression level     
+- Variants (SNP and Indels) called from non-reference sequences     
 
 See [Here](pipeline_scheme.pdf) for the scheme of the pipeline and [Here](reports/taurus_report.pdf) for example of the generated report. 
 
