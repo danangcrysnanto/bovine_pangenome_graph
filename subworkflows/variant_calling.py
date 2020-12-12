@@ -12,7 +12,7 @@ SAMPLES, = glob_wildcards(f"wgs/bam/{{sample}}_{graph_list}pan.bam")
 
 rule all:
     input:
-        expand("wgs/varcall/nonref_{graph}_gatk.vcf.gz", graph=graph_list),
+        expand("wgs/varcall/nonref_{graph}_gatk_comb_pass.vcf.gz", graph=graph_list),
         expand("wgs/varcall/nonref_{graph}_samtools_filtered.vcf.gz", graph=graph_list)
 
 # make bed files out of non-ref sequnces
@@ -250,6 +250,8 @@ rule combine_vcf:
 
         bcftools concat --threads {threads} --file-list file_list.temp -O z -o {output}
 
+        tabix {output} 
+
 
         """
 
@@ -307,5 +309,117 @@ rule filter_samtools:
         bcftools filter -e "QUAL < 20 || INFO/MQ < 30 || INFO/DP < 10 || INFO/AN < 10" \
                 -o {output} -O z {input}
 
+
+        """
+
+localrules: select_SNP
+rule select_SNP:
+    input:
+        "wgs/varcall/nonref_{graph}_gatk.vcf.gz"
+    output:
+        "wgs/varcall/nonref_{graph}_gatk_snp.vcf.gz"
+    params:
+        ref = "wgs/reference/{graph}pan.fa"
+    envmodules:
+        "gcc/4.8.5",
+        "jdk/8u172-b11"
+    shell:
+        """
+
+        gatk SelectVariants \
+            -R {params.ref} \
+            -V {input} \
+            --select-type-to-include SNP \
+            --output {output} 
+
+        """
+
+
+localrules: filter_SNP
+rule filter_SNP:
+    input:
+        "wgs/varcall/nonref_{graph}_gatk_snp.vcf.gz"
+    output:
+        "wgs/varcall/nonref_{graph}_gatk_snp_filtered.vcf.gz"
+    envmodules:
+        "gcc/4.8.5",
+        "jdk/8u172-b11"
+    shell:
+        """
+
+        gatk VariantFiltration \
+            -V {input} \
+            -filter "QD < 2.0" --filter-name "QD2" \
+            -filter "QUAL < 30.0" --filter-name "QUAL30" \
+            -filter "FS > 60.0" --filter-name "FS60" \
+            -filter "MQ < 40.0" --filter-name "MQ40" \
+            -filter "MQRankSum < -12.5" --filter-name "MQRankSum-12.5" \
+            -filter "ReadPosRankSum < -8.0" --filter-name "ReadPosRankSum-8" \
+            -filter "AN < 10" --filter-name "AN10" \
+            -O {output}
+
+        """
+
+localrules: select_indel
+rule select_indel:
+    input:
+        "wgs/varcall/nonref_{graph}_gatk.vcf.gz"
+    output:
+        "wgs/varcall/nonref_{graph}_gatk_indel.vcf.gz"
+    params:
+        ref = "wgs/reference/{graph}pan.fa"
+    envmodules:
+        "gcc/4.8.5",
+        "jdk/8u172-b11"
+    shell:
+        """
+
+        gatk SelectVariants \
+            -R {params.ref} \
+            -V {input} \
+            --select-type-to-include INDEL \
+            --output {output} 
+
+        """
+
+localrules: filter_indel
+rule filter_indel:
+    input:
+        "wgs/varcall/nonref_{graph}_gatk_indel.vcf.gz"
+    output:
+        "wgs/varcall/nonref_{graph}_gatk_indel_filtered.vcf.gz"
+    envmodules:
+        "gcc/4.8.5",
+        "jdk/8u172-b11"
+    shell:
+        """
+
+        gatk VariantFiltration \
+            -V {input} \
+            -filter "QD < 2.0" --filter-name "QD2" \
+            -filter "QUAL < 30.0" --filter-name "QUAL30" \
+            -filter "FS > 200.0" --filter-name "FS200" \
+            -filter "ReadPosRankSum < -20.0" --filter-name "ReadPosRankSum-20" \
+            -filter "AN < 10" --filter-name "AN10" \
+            -O {output}
+
+        """
+
+localrules: merge_gatk_variants
+rule merge_gatk_variants:
+    input:
+        sic = rules.filter_SNP.output,
+        idc = rules.filter_indel.output
+    output:
+        "wgs/varcall/nonref_{graph}_gatk_comb_raw.vcf.gz",
+        "wgs/varcall/nonref_{graph}_gatk_comb_pass.vcf.gz"
+    shell:
+        """
+
+        bcftools concat -a -O z -o {output[0]} {input.sic} {input.idc}
+
+        bcftools view \
+            -f PASS \
+            -o {output[1]} -O z {output[0]}\
 
         """
