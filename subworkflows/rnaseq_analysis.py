@@ -87,7 +87,7 @@ rule map_transcriptome:
     shell:
         """
 
-        hisat2 -x rna_seq/reference/{wildcards.ref}+{wildcards.asb} -1 {input.rna1} -2 {input.rna2} |
+        hisat2  --dta -x rna_seq/reference/{wildcards.ref}+{wildcards.asb} -1 {input.rna1} -2 {input.rna2} |
         samtools view -hu |
         samtools sort -T $TMPDIR -@ 10 -O BAM -o {output} -
 
@@ -128,7 +128,7 @@ rule map_linear_transcriptome:
     shell:
         """
 
-        hisat2 -x rna_seq/reference/{params.reference} -1 {input.rna1} -2 {input.rna2} |
+        hisat2 --dta  -x rna_seq/reference/{params.reference} -1 {input.rna1} -2 {input.rna2} |
         samtools view -hu |
         samtools sort -T $TMPDIR -@ 10 -O BAM -o {output} -
 
