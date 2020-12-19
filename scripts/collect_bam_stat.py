@@ -24,8 +24,11 @@ if __name__ == "__main__":
     mode = args.mode
     samfile = pysam.AlignmentFile(f"wgs/bam/{anims}_{mode}.bam", "rb")
     # dict to save the stat to count
+
     statcount = {"totmap": 0, "unmap": 0, "mapq0": 0, "mapq10": 0, "mapq60": 0,
-                 "al99": 0, "alp": 0, "clip": 0, "suppl": 0, "secondary": 0}
+                 "al99": 0, "alp": 0, "clip": 0, "suppl": 0, "secondary": 0,
+                 "supl_tag": 0, "primary1": 0, "primary2": 0, "totun": 0}
+
     for read in samfile:
         statcount["totmap"] += 1
         if read.is_unmapped:
@@ -49,6 +52,19 @@ if __name__ == "__main__":
                 statcount["suppl"] += 1
             if read.is_secondary:
                 statcount["secondary"] += 1
+            try:
+                read.get_tag("SA")
+                statcount["supl_tag"] += 1
+            except:
+                try:
+                    read.get_tag("XA")
+                    if read.mapping_quality == 60:
+                        statcount["primary2"] += 1
+                except:
+                    if read.mapping_quality > 10:
+                        statcount["primary1"] += 1
+
+    statcount["totun"] = statcount["primary1"] + statcount["primary2"]
     stat = ["totmap", "unmap", "mapq0", "mapq10", "mapq60", "al99",
-            "alp", "clip", "suppl", "secondary"]
+            "alp", "clip", "suppl", "secondary", "supl_tag", "primary1", "primary2", "totun"]
     print(" ".join(str(statcount[x]) for x in stat), anims, mode)
