@@ -4,7 +4,7 @@ R=3.5.1
 
 #python packages
 # can be installed with pip install --user
-snakemake=5.30.1 #mamba install -c conda-forge -c bioconda snakemake=5.30.1
+snakemake=5.30.1 
 pybedtools=0.8.1
 pysam=0.16.0.1
 pandas=1.1.3

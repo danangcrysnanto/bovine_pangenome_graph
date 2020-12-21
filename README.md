@@ -26,8 +26,7 @@ to create environment with all softwares installed. To generate `pdf` report one
 
 ```
 conda env create -f envs/environment.yml
-
-conda activate pangenome # will activate environment named pangenome with all required softwares. 
+conda activate pangenome 
 ```
 
 - Set all parameters required in `config/config.yaml`. All paths will be interpreted relative to the `workdir` directory. 
@@ -40,14 +39,14 @@ Construction of multiple graphs can be specified in the different line e.g.,
 graph1 UCD,OBV,Angus 
 graph2 UCD,Angus 
 ```
-- Job specification in the pipeline designed for `LSF` system. One need to adapt for the other computing cluster. 
+- Job specification in the pipeline designed for `LSF` system. One need to adapt for the other computing clusters. 
 
-**Usage**
+
+**Usage**    
+---
 
 ```
-
 snakemake -s snake_graph.py
-
 ```
 
 **Output**
@@ -65,17 +64,12 @@ snakemake -s snake_graph.py
 
 - Structural variations derived from graphs.      
 These are large variations (fragment length > 100 bp) from bubbles in the graph that are
-not part of the reference sequences. The SVs grouped by biallelic and multiallelic.        
-Visualization of the bubbles (SVs) in the graphs. Bubbles crossing coding sequences visualized using `Graphviz`.       
-Script [app.py](visualize/app.py) (`options -g {graphtype}`) can be run which will set up a local webserver (*not part of the pipeline*) to inspect SVs in a more detailed and in an interactive way (*Under development*). 
+not part of the reference sequences. The SVs grouped by biallelic and multiallelic. Visualization of the bubbles (SVs) in the graphs. Bubbles crossing coding sequences visualized using `Graphviz`.       
+Script [app.py](visualize/app.py) can be run which will set up a local webserver (*not part of the pipeline*) to inspect SVs in a more detailed and in an interactive way (*Under development*). 
 
 - Prediction of novel /non-reference genes with corresponding expression levels from transcriptome. 
 
-- Variants (SNP and Indels) nested in non-reference sequences. One need to run separate pipeline for [variant calling](subworkflows/variant_calling.py). Set running config in [Here](config/config_varcall.yaml). 
+- Variants (SNP and Indels) nested in non-reference sequences. One need to run separate pipeline for [variant calling](subworkflows/variant_calling.py). Set config for the pipeline in [Here](config/config_varcall.yaml). 
 
-- Reports in `reports/{graph}` folder. This contains summary of **computational** resources, statistics of **core/flexible genome**, **non-reference sequences** and **structural variations** derived from graphs. 
+- Reports in `reports/{graph}` folder. This contains summary of computational resources, statistics of core/flexible genome, structural variations, novel gene models derived from graphs. 
 Will output a single pdf from each constructed graph. See the example [Here](reports/taurus_report.pdf).
-
-
- 
-
