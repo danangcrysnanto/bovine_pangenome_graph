@@ -1,9 +1,10 @@
-# Bovine Pangenome Graph
+# Pangenome Graph Pipeline
 
 Pipeline to integrate multiple assemblies into a graph representation.
 This pipeline wraps the functionality [Minigraph](https://github.com/lh3/minigraph) for genome graph construction. 
 We add the utility to labels nodes with the assemblies it derives, which crucial for many pangenome analyses. 
-Analyses which are common in pangenome studies were also performed, which includes:    
+Analyses which are common in pangenome studies are also performed, including:    
+
 - Determination of core and flexible genome    
 - Analysis of non-reference sequences    
 - Extraction of the structural variations     
@@ -16,34 +17,42 @@ Developed for analysis of bovine genomes, but should be applicable to the other 
 
 *Under active development*
 
-
-
-**Requirements**
----
-- [Minigraphs](https://github.com/lh3/minigraph) 
-- [Gfatools](https://github.com/lh3/gfatools)
-- Python, minimal version 3.7
-- R (including dplyr and magrittr package)
-
-*To be updated*
-
 **Input**
 ---
-- Set all parameter required in `config/config.yaml`. All paths will be interpreted relative to this directory. 
-- Multiple Assemblies in the `workdir/assembly` with naming scheme of {population/breed}.fa. The prefix will be used as identifier for the assembly.
-- A file `config/graph_comp.tsv` that mapping the name of graph and the order of inclusion e.g., `graph1 UCD,OBV,Angus`.    
+
+- [Minigraphs](https://github.com/lh3/minigraph) and [Gfatools](https://github.com/lh3/gfatools) need to be installed and available in `$PATH`.
+Required python packages, R libraries, and bioinformatic softwares are listed [Here](envs/software_used.tsv). Alternatively, one could use `mamba / conda`
+to create environment with all softwares installed. To generate `pdf` report one need to install [weasyprint](https://weasyprint.org/start/).
+
+```
+conda env create -f envs/environment.yml
+
+conda activate pangenome # will activate environment named pangenome with all required softwares. 
+```
+
+- Set all parameters required in `config/config.yaml`. All paths will be interpreted relative to the `workdir` directory. 
+- Multiple assemblies in the `workdir/assembly` with naming scheme of {population}.fa. The prefix will be used as identifier for the assembly.
+- A file `config/graph_comp.tsv` that mapping the name of graph and the order of inclusion.
 First in the order used as the graph backbone, which is usually the reference genome (e.g., UCD).       
 Construction of multiple graphs can be specified in the different line e.g., 
 
 ``` 
 graph1 UCD,OBV,Angus 
 graph2 UCD,Angus 
-``` 
-- *Optional* : Functional analysis of the non-ref sequences, which includes gene prediction and transcriptome mapping. 
-Set `rna_seq` to `True` in config to enable this analysis. You also need to provide annotation file/gff and fastq of the transcriptome in config.  
+```
+- Job specification in the pipeline designed for `LSF` system. One need to adapt for the other computing cluster. 
+
+**Usage**
+
+```
+
+snakemake -s snake_graph.py
+
+```
 
 **Output**
 ---
+
 - Integrated pangenome graphs in `graph` folder with prefix set in the config e.g., `graph1.gfa`    
 - Matrix that map node to the assembly it derives (i.e., node colour), e.g.,    
 
@@ -58,9 +67,11 @@ Set `rna_seq` to `True` in config to enable this analysis. You also need to prov
 These are large variations (fragment length > 100 bp) from bubbles in the graph that are
 not part of the reference sequences. The SVs grouped by biallelic and multiallelic.        
 Visualization of the bubbles (SVs) in the graphs. Bubbles crossing coding sequences visualized using `Graphviz`.       
-Script [app.py](visualize/app.py) (`options -g {graphtype}`) can be run which will set up a local webserver (*not part of the pipeline*) to inspect SVs in a more detailed and in an interactive way. 
+Script [app.py](visualize/app.py) (`options -g {graphtype}`) can be run which will set up a local webserver (*not part of the pipeline*) to inspect SVs in a more detailed and in an interactive way (*Under development*). 
 
-- *Optional* if including the functional analysis: prediction of novel /non-reference genes with corresponding expression levels from transcriptome. 
+- Prediction of novel /non-reference genes with corresponding expression levels from transcriptome. 
+
+- Variants (SNP and Indels) nested in non-reference sequences. One need to run separate pipeline for [variant calling](subworkflows/variant_calling.py). Set running config in [Here](config/config_varcall.yaml). 
 
 - Reports in `reports/{graph}` folder. This contains summary of **computational** resources, statistics of **core/flexible genome**, **non-reference sequences** and **structural variations** derived from graphs. 
 Will output a single pdf from each constructed graph. See the example [Here](reports/taurus_report.pdf).

@@ -6,22 +6,22 @@ workdir: final_graph
 gffinput: /path/to/gff
 
 # Setting for rna-seq analysis
-rna_seq: True
+rna_seq: False
 reference: {ref}
 # diamond protein db for blast 
 refprot: /ref/to/diamondprotdb
 rna_basedir: /ref/to/fastq_rna
 
 # setting for wgs analysis
-dna_seq: True
-dna_basedir: /cluster/work/pausch/inputs/fastq/BTA
+dna_seq: False
+dna_basedir: /ref/to/bamfile
 dna_ref: 
- - UCD
- - OBV
- - graph6
+ - ref1
+ - ref2
+ - ref3
 dna_anims:
- - RM724
- - RM806
- - RM720
- - BSWCHEF120075378834
- - BSWCHEF120108462332
+ - anim1
+ - anim2
+ - anim3
+ - anim4
+ - anim5

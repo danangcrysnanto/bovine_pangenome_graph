@@ -1,11 +1,11 @@
 # config for variant calling
 
-workdir: graph_trial
+workdir: /workdir #all path will be relative to the directory set here
 
 
 # directory of bam files
 # noted that the bam named as $anim.bam
-bamdir: "/cluster/work/pausch/danang/pangenome_nonref/data/hybrid_assem/assembly/graph_pipe/graph_trial/wgs/bam"
+bamdir: /path/to/bamdir
 
 # from which graph the variants called
 graph: "graphord"
@@ -13,5 +13,5 @@ graph: "graphord"
 # reference
 # ref: wgs/reference/graph6pan.fa
 
-# known variant database
-knowvar: "/cluster/work/pausch/inputs/ref/BTA/UCD1.2/ARS1.2PlusY_BQSR.vcf.gz"
+# known variant database for BQSR
+knowvar: /path/to/known_variant
