@@ -27,6 +27,7 @@ def sv_analysis_output():
 
     sv_out = []
     sv_out.extend(expand("analysis/bubble/{asb}_nonrefsv.fa", asb=graphcon))
+    sv_out.extend(expand("analysis/bubble/{asb}_nonrefsv_woflank.fa", asb=graphcon))
     sv_out.extend(expand("analysis/bubble/{asb}_breakpoint_annot.tsv", asb=graphcon))
     sv_out.extend(expand("analysis/bubble/{asb}_{svtype}_sv_viz.pdf", asb=graphcon, svtype=svlist))
     sv_out.extend(expand("analysis/bubble/{asb}_exon_viz.pdf", asb=graphcon))
