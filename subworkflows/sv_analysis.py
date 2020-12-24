@@ -144,6 +144,29 @@ rule combine_sv:
             cat {input} > {output}
         """
 
+rule combine_sv_woflank:
+    input:
+        bialfile = "analysis/bubble/{asb}_bialsv_stat.tsv",
+        multifile = "analysis/bubble/{asb}_multisv_stat.tsv",
+        graphfile = "graph/{asb}_graph.gfa"
+    output:
+        "analysis/bubble/{asb}_nonrefsv_woflank.fa"
+    threads: 10
+    resources:
+        mem_mb = 2000,
+        walltime = "04:00"
+    shell:
+        """
+
+        {workflow.basedir}/scripts/get_sv_woflank.py \
+                -b {input.bialfile} \
+                -m {input.multifile} \
+                -g {input.graphfile} \
+                -o {output}
+
+        """
+
+
 localrules: create_full_ref
 rule create_full_ref:
     input:
