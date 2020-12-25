@@ -19,6 +19,7 @@ weasyprint=51
 tidyverse=1.2.1
 magrittr=1.5
 ape=5.4.1
+edgeR=3.24.3
 optparse=1.6.2
 
 # Bioinformatic softwares
