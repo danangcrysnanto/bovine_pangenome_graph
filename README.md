@@ -64,7 +64,7 @@ snakemake -s snake_graph.py
 
 - Structural variations derived from graphs.      
 These are large variations (fragment length > 100 bp) from bubbles in the graph that are
-not part of the reference sequences. The SVs grouped by biallelic and multiallelic. Visualization of the bubbles (SVs) in the graphs. Bubbles crossing coding sequences visualized using `Graphviz`.       
+not part of the reference sequences. The SVs grouped by biallelic and multiallelic. SVs crossing coding sequences visualized using `Graphviz`.       
 Script [app.py](visualize/app.py) can be run which will set up a local webserver (*not part of the pipeline*) to inspect SVs in a more detailed and in an interactive way (*Under development*). 
 
 - Prediction of novel /non-reference genes with corresponding expression levels from transcriptome. 
