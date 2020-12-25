@@ -20,9 +20,9 @@ Developed for analysis of bovine genomes, but should be applicable to the other 
 **Input**
 ---
 
-- [Minigraphs](https://github.com/lh3/minigraph) and [Gfatools](https://github.com/lh3/gfatools) need to be installed and available in `$PATH`.
+- [Minigraphs](https://github.com/lh3/minigraph) and [Gfatools](https://github.com/lh3/gfatools) need to be installed and available in `$PATH`. Please downloaded [Here](https://doi.org/10.5281/zenodo.4393273) to get the same version used in the paper. 
 Required python packages, R libraries, and bioinformatic softwares are listed [Here](envs/software_used.tsv). Alternatively, one could use `mamba / conda`
-to create environment with all softwares installed. To generate `pdf` report one need to install [weasyprint](https://weasyprint.org/start/).
+to create environment with all softwares installed (Minigraph not included). To generate `pdf` report one need to install [weasyprint](https://weasyprint.org/start/).
 
 ```
 conda env create -f envs/environment.yml
